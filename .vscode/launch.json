@@ -1,0 +1,22 @@
+{
+    // Use IntelliSense para saber los atributos posibles.
+    // Mantenga el puntero para ver las descripciones de los existentes atributos.
+    // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "List providers",
+            "type": "debugpy",
+            "request": "launch",
+            "cwd": "${workspaceRoot}/excludarr",
+            "program": "./main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "providers",
+                "list"
+            ],
+            "preLaunchTask": "PreRun Task"
+        }
+    ]
+}
