@@ -1,0 +1,16 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"[python]": {
+			"diffEditor.ignoreTrimWhitespace": false,
+			"gitlens.codeLens.symbolScopes": [
+				"!Module"
+			],
+			"editor.rulers": [100]
+		}
+	}
+}
