@@ -123,12 +123,12 @@ def print_providers(providers):
         table.add_column("JustWatch ID")
         table.add_column("Provider")
 
-        for provider in providers:
-            id = str(provider["id"])
-            clear_name = provider["clear_name"]
+        for provider in providers.get("data").get("packages"):
+            jw_id = str(provider["id"])
+            clear_name = provider["clearName"]
 
             # Add table rows
-            table.add_row(id, clear_name)
+            table.add_row(jw_id, clear_name)
 
 
 def ask_confirmation(action, kind):

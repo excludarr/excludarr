@@ -4,7 +4,7 @@ import requests
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from json import JSONDecodeError
-from utils.locales import locales as default_locales
+from excludarr.utils.locales import locales as default_locales
 
 from .exceptions import JustWatchTooManyRequests, JustWatchNotFound, JustWatchBadRequest
 
@@ -88,7 +88,8 @@ fragment SearchTitleGraphql on PopularTitlesEdge {
 _GRAPHQL_LIST_PROVIDERS_QUERY = """
 query GetPackages($platform: Platform! = WEB, $country: Country!) {
     packages(country: $country, platform: $platform, includeAddons: false) {
-        clearName
+        clearName,
+        id
     }
 }
 """
@@ -141,7 +142,7 @@ class JustWatch(object):
         return result_json
 
     def _http_request(self, json=None, params=None):
-        url = self._build_url("/query")
+        url = self._build_url("")
         headers = {"Content-Type": "application/json"}
         data = {"query": json, "variables": params}
         request = requests.Request("POST", url, headers=headers, json=data)
@@ -161,9 +162,12 @@ class JustWatch(object):
 
         return default_locale
 
+    def _get_country_from_locale(self):
+        return self.locale.split("_")[-1]
+
     def get_providers(self):
         query = _GRAPHQL_LIST_PROVIDERS_QUERY
-        variables = {"locale": self.locale}
+        variables = {"country": self._get_country_from_locale(), "platform": "WEB"}
         return self._http_request(query, variables)
 
     def query_title(self, query, content_type, fast=True, result=None, page=1, **kwargs):
