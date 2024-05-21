@@ -322,4 +322,7 @@ Below are some frequently asked questions. Please look if your question is liste
 
 **A:** No, Sonarr V2 is EOL (End Of Life) and therefor not supported by Excludarr. Please upgrade to Sonarr V3 by reading the [upgrade guide](https://forums.sonarr.tv/t/v3-is-now-officially-stable-v2-is-eol/27858)
 
-##
+## License
+The project is [licensed](LICENSE) under [GNU General Public License v3](https://www.gnu.org/licenses/gpl-3.0.html) or later. 
+
+This project is a fork of this [original project](https://github.com/haijeploeg/excludarr), where you can find its [original MIT license](https://github.com/haijeploeg/excludarr/blob/main/LICENSE).  A copy of the original license is also included in this repository in [LICENSE.old](LICENSE.old)
