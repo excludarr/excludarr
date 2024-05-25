@@ -4,6 +4,8 @@ from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from json import JSONDecodeError
 
+from simplejustwatchapi.justwatch import search
+
 from .exceptions import JustWatchTooManyRequests, JustWatchNotFound, JustWatchBadRequest
 
 
@@ -113,12 +115,17 @@ class JustWatch(object):
         if kwargs:
             json.update(kwargs)
 
-        page_result = self._http_post(path, json=json)
-        result.update(page_result)
+        # page_result = self._http_post(path, json=json)
 
-        if not fast and page < result["total_pages"]:
-            page += 1
-            self.query_title(query, content_type, fast=fast, result=result, page=page)
+        [lang, country] = self.locale.split("_") 
+        result = search(query, country, lang, 5, True)
+
+        # I don't think we need paging any longer
+        # result.update(page_result)
+
+        # if not fast and page < result["total_pages"]:
+        #     page += 1
+        #     self.query_title(query, content_type, fast=fast, result=result, page=page)
 
         return result
 

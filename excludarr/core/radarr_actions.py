@@ -1,8 +1,11 @@
+from typing import List
 from loguru import logger
 from rich.progress import Progress
 from pyarr import RadarrAPI
 
 import excludarr.utils.filters as filters
+
+from simplejustwatchapi.query import MediaEntry
 
 from excludarr.modules.justwatch import JustWatch
 from excludarr.modules.justwatch.exceptions import JustWatchNotFound, JustWatchTooManyRequests
@@ -16,8 +19,9 @@ class RadarrActions:
         logger.debug(f"Initializing JustWatch API with locale: {locale}")
         self.justwatch_client = JustWatch(locale)
 
-    def _get_jw_movie_data(self, title, jw_entry):
-        jw_id = jw_entry["id"]
+    def _get_jw_movie_data(self, title, jw_entry: MediaEntry):
+        # jw_id = jw_entry["id"]
+        jw_id = jw_entry.entry_id
         jw_movie_data = {}
         jw_tmdb_ids = []
 
@@ -35,7 +39,7 @@ class RadarrActions:
 
         return jw_movie_data, jw_tmdb_ids
 
-    def _find_movie(self, movie, jw_providers, fast, exclude):
+    def _find_movie(self, movie, jw_providers, fast, exclude) -> MediaEntry:
         # Set the minimal base variables
         title = movie["title"]
         tmdb_id = movie["tmdbId"]
@@ -62,16 +66,22 @@ class RadarrActions:
 
         # Log the JustWatch API call function
         logger.debug(f"Query JustWatch API with title: {title}")
-        jw_query_data = self.justwatch_client.query_title(title, "movie", fast, **jw_query_payload)
+        jw_query_data: List[MediaEntry] = self.justwatch_client.query_title(title, "movie", fast, **jw_query_payload)
 
-        for entry in jw_query_data["items"]:
-            jw_id = entry["id"]
-            jw_movie_data, jw_tmdb_ids = self._get_jw_movie_data(title, entry)
+        # for entry in jw_query_data["items"]:
+        for entry in jw_query_data:
+            # jw_id = entry["id"]
+            jw_id = entry.entry_id
+            #jw_movie_data, jw_tmdb_ids = self._get_jw_movie_data(title, entry)
 
             # Break if the TMBD_ID in the query of JustWatch matches the one in Radarr
-            if tmdb_id in jw_tmdb_ids:
+            # if tmdb_id in jw_tmdb_ids:
+            #     logger.debug(f"Found JustWatch ID: {jw_id} for {title} with TMDB ID: {tmdb_id}")
+            #     return jw_id, jw_movie_data
+            
+            if tmdb_id == jw_id: #jw_id is a tmbdb_id
                 logger.debug(f"Found JustWatch ID: {jw_id} for {title} with TMDB ID: {tmdb_id}")
-                return jw_id, jw_movie_data
+                return jw_id, entry
 
         return None, None
 
