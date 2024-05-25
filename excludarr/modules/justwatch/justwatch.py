@@ -4,7 +4,9 @@ from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from json import JSONDecodeError
 
-from .exceptions import JustWatchTooManyRequests, JustWatchNotFound, JustWatchBadRequest
+from simplejustwatchapi.justwatch import search
+
+from .exceptions import JustWatchTooManyRequests, JustWatchForbidden, JustWatchNotFound, JustWatchBadRequest
 
 
 class JustWatch(object):
@@ -25,7 +27,7 @@ class JustWatch(object):
             allowed_methods=["GET", "POST"],
         )
 
-        self.session.mount("http://", HTTPAdapter(max_retries=retries))
+        # self.session.mount("http://", HTTPAdapter(max_retries=retries))
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
         # Setup locale by verifying its input
@@ -41,6 +43,8 @@ class JustWatch(object):
 
         if data.status_code == 400:
             raise JustWatchBadRequest(data.text)
+        if data.status_code == 403:
+            raise JustWatchForbidden()
         elif data.status_code == 404:
             raise JustWatchNotFound()
         elif data.status_code == 429:
@@ -54,8 +58,12 @@ class JustWatch(object):
         return result_json
 
     def _http_request(self, method, path, json=None, params=None):
+        # JustWatch returns a 403 without a reasonable User-Agent
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36'
+        }
         url = self._build_url(path)
-        request = requests.Request(method, url, json=json, params=params)
+        request = requests.Request(method, url, headers=headers, json=json, params=params)
 
         prepped = self.session.prepare_request(request)
         result = self.session.send(prepped)
@@ -113,12 +121,17 @@ class JustWatch(object):
         if kwargs:
             json.update(kwargs)
 
-        page_result = self._http_post(path, json=json)
-        result.update(page_result)
+        # page_result = self._http_post(path, json=json)
 
-        if not fast and page < result["total_pages"]:
-            page += 1
-            self.query_title(query, content_type, fast=fast, result=result, page=page)
+        [lang, country] = self.locale.split("_") 
+        result = search(query, country, lang, 5, True)
+
+        # I don't think we need paging any longer
+        # result.update(page_result)
+
+        # if not fast and page < result["total_pages"]:
+        #     page += 1
+        #     self.query_title(query, content_type, fast=fast, result=result, page=page)
 
         return result
 

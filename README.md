@@ -1,11 +1,13 @@
-![License](https://img.shields.io/github/license/haijeploeg/excludarr)
-[![release](https://github.com/haijeploeg/excludarr/actions/workflows/release.yml/badge.svg)](https://github.com/haijeploeg/excludarr/actions/workflows/release.yml)
-[![Docker](https://github.com/haijeploeg/excludarr/actions/workflows/docker.yml/badge.svg)](https://github.com/haijeploeg/excludarr/actions/workflows/docker.yml)
-[![PyPI version](https://badge.fury.io/py/excludarr.svg)](https://badge.fury.io/py/excludarr)
-![PyPI - Downloads](https://img.shields.io/pypi/dm/excludarr)
-![Docker Pulls](https://img.shields.io/docker/pulls/haijeploeg/excludarr)
+![License](https://img.shields.io/github/license/excludarr/excludarr)
 
 # Excludarr
+
+<blockquote>
+❗ This project is a continuation of <a href=https://github.com/haijeploeg/excludarr>haijeploeg/excludarr</a> which became unmaintained and stopped working around October, 2023 due to <a href="https://github.com/haijeploeg/excludarr/issues/92">this issue</a>, which this project has corrected.  However, due to changes in the JustWatch API, the <mark style="background-color: #dddddd">&nbsp;sonarr&nbsp;</mark> command is disabled, until new API calls can be implemented in a subsequent update.  
+
+
+</blockquote>
+<br/>
 
 Excludarr is a CLI that interacts with Radarr and Sonarr instances. It completely manages you library in Sonarr and Radarr to only consist out of movies and series that are not present on any of the configured streaming providers. Excludarr can also re monitor movies and series if it is not available anymore on any of the configured streaming providers. You can also configure to delete the already downloaded files of the excluded entry to keep your storage happy! 🎉
 
@@ -218,21 +220,21 @@ Succesfully changed the status of the series listed in Sonarr to monitored!
 
 To use this setup using Docker, you can use the `haijeploeg/excludarr` container. You can use the following environment variables:
 
-Variable | Default | Description
---- | --- | ---
-GENERAL_FAST_SEARCH | true | Enable or disable fast search, can be `true` or `false`.
-GENERAL_LOCALE | en_US | The locale to use, can also be a two letter country code.
-GENERAL_PROVIDERS | Netflix | Comma seperated list of providers. e.g. `GENERAL_PROVIDERS=netflix, amazon prime video`.
-TMDB_API_KEY | - | Your TMDB API key. This setting is optional and only used in fallback scenario's.
-RADARR_URL | http://localhost:7878 | The Radarr URL.
-RADARR_API_KEY | secret | Your Radarr API Key.
-RADARR_VERIFY_SSL | false | To enable SSL verify, can be `true` or `false`.
-RADARR_EXCLUDE | - | Comma seperated list of movies to exclude in the process of Excludarr, e.g. `RADARR_EXCLUDE=The Matrix, F9`.
-SONARR_URL | http://localhost:8989 | The Sonarr URL.
-SONARR_API_KEY | secret | Your Sonarr API Key.
-SONARR_VERIFY_SSL | false | To enable SSL verify, can be `true` or `false`.
-SONARR_EXCLUDE | - | Comma seperated list of series to exclude in Excludarr, e.g. `SONARR_EXCLUDE=Breaking Bad, Game of Thrones`.
-CRON_MODE | false | Wether to run the docker container using cron. This is useful for docker-compose.
+| Variable | Default | Description |
+| --- | --- | --- |
+| GENERAL_FAST_SEARCH | true | Enable or disable fast search, can be `true` or `false`. |
+| GENERAL_LOCALE | en_US | The locale to use, can also be a two letter country code. |
+| GENERAL_PROVIDERS | Netflix | Comma seperated list of providers. e.g. `GENERAL_PROVIDERS=netflix, amazon prime video`. |
+| TMDB_API_KEY | - | Your TMDB API key. This setting is optional and only used in fallback scenario's. |
+| RADARR_URL | http://localhost:7878 | The Radarr URL. |
+| RADARR_API_KEY | secret | Your Radarr API Key. |
+| RADARR_VERIFY_SSL | false | To enable SSL verify, can be `true` or `false`. |
+| RADARR_EXCLUDE | - | Comma seperated list of movies to exclude in the process of Excludarr, e.g. `RADARR_EXCLUDE=The Matrix, F9`. |
+| SONARR_URL | http://localhost:8989 | The Sonarr URL. |
+| SONARR_API_KEY | secret | Your Sonarr API Key. |
+| SONARR_VERIFY_SSL | false | To enable SSL verify, can be `true` or `false`. |
+| SONARR_EXCLUDE | - | Comma seperated list of series to exclude in Excludarr, e.g. `SONARR_EXCLUDE=Breaking Bad, Game of Thrones`. |
+| CRON_MODE | false | Wether to run the docker container using cron. This is useful for docker-compose. |
 
 You can put those variables in a env file (e.g. `excludarr.env`) and use it in a command (recommended way). Look the [docker_example.env](.examples/docker_example.env) for an example. If you have set your variables properly, you can execute excludarr in docker by just adding the command and paramaters at the end of the docker command. Example:
 
@@ -323,6 +325,7 @@ Below are some frequently asked questions. Please look if your question is liste
 **A:** No, Sonarr V2 is EOL (End Of Life) and therefor not supported by Excludarr. Please upgrade to Sonarr V3 by reading the [upgrade guide](https://forums.sonarr.tv/t/v3-is-now-officially-stable-v2-is-eol/27858)
 
 ## License
-The project is [licensed](LICENSE) under [GNU General Public License v3](https://www.gnu.org/licenses/gpl-3.0.html) or later. 
+
+The project is [licensed](LICENSE) under [GNU General Public License v3](https://www.gnu.org/licenses/gpl-3.0.html) or later.
 
 This project is a fork of this [original project](https://github.com/haijeploeg/excludarr), where you can find its [original MIT license](https://github.com/haijeploeg/excludarr/blob/main/LICENSE).  A copy of the original license is also included in this repository in [LICENSE.old](LICENSE.old)
