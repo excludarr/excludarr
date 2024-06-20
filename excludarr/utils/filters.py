@@ -1,6 +1,8 @@
 import datetime
 import itertools
 
+from simplejustwatchapi.query import MediaEntry
+
 
 def flatten(lst):
     return list(set(itertools.chain.from_iterable(lst)))
@@ -58,15 +60,18 @@ def get_providers(raw_providers, providers):
     return jw_providers
 
 
-def get_jw_providers(raw_data):
+def get_jw_providers(raw_data: MediaEntry):
     providers = {}
 
     try:
-        for entry in raw_data["offers"]:
+        #for entry in raw_data["offers"]:
+        for entry in raw_data.offers:
             providers.update(
                 {
-                    entry["provider_id"]: {
-                        "shortname": entry["package_short_name"],
+                    #entry["provider_id"]: {
+                    entry.package.package_id: {
+                        #"shortname": entry["package_short_name"],
+                        "shortname": entry.package.technical_name,
                     }
                 }
             )

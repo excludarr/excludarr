@@ -16,7 +16,7 @@ app = typer.Typer()
 @app.command(help="Exclude movies in Radarr by deleting or not monitoring them")
 def exclude(
     providers: Optional[List[str]] = typer.Option(
-        None,
+        [],
         "-p",
         "--provider",
         metavar="PROVIDER",
@@ -72,7 +72,7 @@ def exclude(
         disable_progress = True
 
     # Determine if CLI options should overwrite configuration settings
-    if not providers:
+    if not providers or len(providers) == 0:
         providers = config.providers
     if not locale:
         locale = config.locale
