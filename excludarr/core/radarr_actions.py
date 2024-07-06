@@ -1,8 +1,11 @@
+from typing import List
 from loguru import logger
 from rich.progress import Progress
 from pyarr import RadarrAPI
 
 import excludarr.utils.filters as filters
+
+from simplejustwatchapi.query import MediaEntry
 
 from excludarr.modules.justwatch import JustWatch
 from excludarr.modules.justwatch.exceptions import JustWatchNotFound, JustWatchTooManyRequests
@@ -16,8 +19,8 @@ class RadarrActions:
         logger.debug(f"Initializing JustWatch API with locale: {locale}")
         self.justwatch_client = JustWatch(locale)
 
-    def _get_jw_movie_data(self, title, jw_entry):
-        jw_id = jw_entry["id"]
+    def _get_jw_movie_data(self, title, jw_entry: MediaEntry):
+        jw_id = jw_entry.entry_id
         jw_movie_data = {}
         jw_tmdb_ids = []
 
@@ -35,10 +38,11 @@ class RadarrActions:
 
         return jw_movie_data, jw_tmdb_ids
 
-    def _find_movie(self, movie, jw_providers, fast, exclude):
+    def _find_movie(self, movie, jw_providers, fast, exclude) -> MediaEntry:
         # Set the minimal base variables
         title = movie["title"]
         tmdb_id = movie["tmdbId"]
+        imdb_id = movie["imdbId"]
         release_year = filters.get_release_date(movie, format="%Y")
         providers = [values["short_name"] for _, values in jw_providers.items()]
 
@@ -62,18 +66,18 @@ class RadarrActions:
 
         # Log the JustWatch API call function
         logger.debug(f"Query JustWatch API with title: {title}")
-        jw_query_data = self.justwatch_client.query_title(title, "movie", fast, **jw_query_payload)
+        jw_query_data: List[MediaEntry] = self.justwatch_client.query_title(title, "movie", fast, **jw_query_payload)
 
-        for entry in jw_query_data["items"]:
-            jw_id = entry["id"]
-            jw_movie_data, jw_tmdb_ids = self._get_jw_movie_data(title, entry)
+        # logger.debug(f"{jw_query_data=}")
 
-            # Break if the TMBD_ID in the query of JustWatch matches the one in Radarr
-            if tmdb_id in jw_tmdb_ids:
-                logger.debug(f"Found JustWatch ID: {jw_id} for {title} with TMDB ID: {tmdb_id}")
-                return jw_id, jw_movie_data
+        for entry in jw_query_data:
+            jw_imdb_id = entry.imdb_id
+            
+            if imdb_id == jw_imdb_id: 
+                logger.debug(f"Found JustWatch IMDB ID: {jw_imdb_id} for {title} with Radarr IMDB ID: {imdb_id}")
+                return entry
 
-        return None, None
+        return None
 
     def get_movies_to_exclude(self, providers, fast=True, disable_progress=False):
         exclude_movies = {}
@@ -98,16 +102,19 @@ class RadarrActions:
                 radarr_id = movie["id"]
                 title = movie["title"]
                 tmdb_id = movie["tmdbId"]
+                imdb_id = movie["imdbId"]
                 filesize = movie["sizeOnDisk"]
                 release_date = filters.get_release_date(movie)
 
                 # Log the title and Radarr ID
                 logger.debug(
-                    f"Processing title: {title} with Radarr ID: {radarr_id} and TMDB ID: {tmdb_id}"
+                    f"Processing title: {title} with Radarr ID: {radarr_id} and IMDB ID: {imdb_id}"
                 )
 
                 # Find the movie
-                jw_id, jw_movie_data = self._find_movie(movie, jw_providers, fast, exclude=True)
+                jw_movie_data = self._find_movie(movie, jw_providers, fast, exclude=True)
+
+                # logger.debug(f"{jw_movie_data=}")
 
                 if jw_movie_data:
                     # Get all the providers the movie is streaming on
@@ -133,7 +140,8 @@ class RadarrActions:
                                     "release_date": release_date,
                                     "radarr_object": movie,
                                     "tmdb_id": tmdb_id,
-                                    "jw_id": jw_id,
+                                    "jw_id": jw_movie_data.entry_id,
+                                    "imdb_id": imdb_id,
                                     "providers": clear_names,
                                 }
                             }
@@ -167,11 +175,12 @@ class RadarrActions:
                 radarr_id = movie["id"]
                 title = movie["title"]
                 tmdb_id = movie["tmdbId"]
+                imdb_id = movie["imdbId"]
                 release_date = filters.get_release_date(movie)
 
                 # Log the title and Radarr ID
                 logger.debug(
-                    f"Processing title: {title} with Radarr ID: {radarr_id} and TMDB ID: {tmdb_id}"
+                    f"Processing title: {title} with Radarr ID: {radarr_id} and IMDB ID: {imdb_id}"
                 )
 
                 # Find the movie
@@ -192,6 +201,7 @@ class RadarrActions:
                                     "release_date": release_date,
                                     "radarr_object": movie,
                                     "tmdb_id": tmdb_id,
+                                    "imdb_id": imdb_id,
                                     "jw_id": jw_id,
                                 }
                             }

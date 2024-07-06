@@ -11,9 +11,14 @@ import excludarr.commands.providers as providers
 from excludarr import __version__
 
 
+def sonarr_disabled_callback():
+    typer.echo("sonarr command is currently disabled. See https://github.com/excludarr/excludarr/issues/2 for more information.", file=sys.stderr)
+    raise typer.Exit(1)
+
+
 app = typer.Typer()
 app.add_typer(radarr.app, name="radarr", help="Manages movies in Radarr.")
-app.add_typer(sonarr.app, name="sonarr", help="Manages TV shows, seasons and episodes in Sonarr.")
+app.add_typer(sonarr.app, name="sonarr", help="Manages TV shows, seasons and episodes in Sonarr.", callback=sonarr_disabled_callback)
 app.add_typer(
     providers.app, name="providers", help="List all the possible providers for your locale."
 )
@@ -62,7 +67,6 @@ def main(
 
     # Logging
     logger.debug(f"Starting Excludarr v{__version__}")
-
 
 def cli():
     app(prog_name="excludarr")
