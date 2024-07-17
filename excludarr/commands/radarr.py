@@ -139,7 +139,7 @@ def exclude(
 @app.command(help="Change status of movies to monitored if no provider is found")
 def re_add(
     providers: Optional[List[str]] = typer.Option(
-        None,
+        [],
         "-p",
         "--provider",
         metavar="PROVIDER",
