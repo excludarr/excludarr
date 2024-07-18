@@ -18,7 +18,7 @@ def sonarr_disabled_callback():
 
 app = typer.Typer()
 app.add_typer(radarr.app, name="radarr", help="Manages movies in Radarr.")
-app.add_typer(sonarr.app, name="sonarr", help="Manages TV shows, seasons and episodes in Sonarr.", callback=sonarr_disabled_callback)
+app.add_typer(sonarr.app, name="sonarr", help="Manages TV shows, seasons and episodes in Sonarr.")
 app.add_typer(
     providers.app, name="providers", help="List all the possible providers for your locale."
 )
