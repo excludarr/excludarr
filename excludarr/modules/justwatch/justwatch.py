@@ -4,7 +4,15 @@ from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
 from json import JSONDecodeError
 
-from .exceptions import JustWatchTooManyRequests, JustWatchNotFound, JustWatchBadRequest
+# from simplejustwatchapi.justwatch import search
+
+from .exceptions import (
+    JustWatchTooManyRequests,
+    JustWatchForbidden,
+    JustWatchNotFound,
+    JustWatchBadRequest,
+)
+from .models import MovieOffers, SearchResult, Offer, ShowOffers
 
 
 class JustWatch(object):
@@ -29,7 +37,8 @@ class JustWatch(object):
         self.session.mount("https://", HTTPAdapter(max_retries=retries))
 
         # Setup locale by verifying its input
-        self.locale = self._get_full_locale(locale)
+        self._locale = self._get_full_locale(locale)
+        [self._language, self._country] = self._locale.split("_")
 
     def __exit__(self, *args):
         self.session.close()
@@ -54,8 +63,14 @@ class JustWatch(object):
         return result_json
 
     def _http_request(self, method, path, json=None, params=None):
+        # JustWatch returns a 403 without a reasonable User-Agent
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
+        }
         url = self._build_url(path)
-        request = requests.Request(method, url, json=json, params=params)
+        request = requests.Request(
+            method, url, headers=headers, json=json, params=params
+        )
 
         prepped = self.session.prepare_request(request)
         result = self.session.send(prepped)
@@ -84,7 +99,9 @@ class JustWatch(object):
 
         # Check if the locale is a iso_3166_2 Country Code
         if not valid_locale:
-            locale = "".join([i["full_locale"] for i in jw_locales if i["iso_3166_2"] == locale])
+            locale = "".join(
+                [i["full_locale"] for i in jw_locales if i["iso_3166_2"] == locale]
+            )
 
         # If the locale is empty return the default locale
         if not locale:
@@ -93,46 +110,119 @@ class JustWatch(object):
         return locale
 
     def get_providers(self):
-        path = f"/providers/locale/{self.locale}"
+        path = f"/providers/locale/{self._locale}"
 
         return self._http_get(path)
 
-    def query_title(self, query, content_type, fast=True, result={}, page=1, **kwargs):
-        """
-        Query JustWatch API to find information about a title
+    def query_movie_offers(
+        self, jwid: str, providers: list[str] = [], forceFlatrate=False
+    ) -> MovieOffers:
+        result_json = self.__get_providers(jwid, providers, forceFlatrate)
 
-        :query: the title of the show or movie to search for
-        :content_type: can either be 'show' or 'movie'. Can also be a list of types.
-        """
-        path = f"/titles/{self.locale}/popular"
+        result = []
 
-        if isinstance(content_type, str):
-            content_type = content_type.split(",")
-
-        json = {"query": query, "content_types": content_type}
-        if kwargs:
-            json.update(kwargs)
-
-        page_result = self._http_post(path, json=json)
-        result.update(page_result)
-
-        if not fast and page < result["total_pages"]:
-            page += 1
-            self.query_title(query, content_type, fast=fast, result=result, page=page)
+        for offer in result_json["data"]["node"]["offers"]:
+            result.append(Offer(offer))
 
         return result
 
-    def get_movie(self, jw_id):
-        path = f"/titles/movie/{jw_id}/locale/{self.locale}"
+    def query_show_offers(
+        self, jwid: str, providers: list[str] = [], forceFlatrate=False
+    ) -> ShowOffers:
+        result_json = self.__get_providers(jwid, providers, forceFlatrate)
 
-        return self._http_get(path)
+        result = {}
 
-    def get_show(self, jw_id):
-        path = f"/titles/show/{jw_id}/locale/{self.locale}"
+        for season in result_json["data"]["node"]["seasons"]:
+            season_n = season["content"]["seasonNumber"]
+            result[season_n] = {}
+            for episode in season["episodes"]:
+                episode_n = episode["content"]["episodeNumber"]
+                result[season_n][episode_n] = []
+                for offer in episode["offers"]:
+                    result[season_n][episode_n].append(Offer(offer))
 
-        return self._http_get(path)
+        return result
 
-    def get_season(self, jw_id):
-        path = f"/titles/show_season/{jw_id}/locale/{self.locale}"
+    def search_movie(
+        self, title: str, results=4, year: int | None = None
+    ) -> list[SearchResult]:
+        res = self.__search(title, "MOVIE", results, year)
 
-        return self._http_get(path)
+        return res
+
+    def search_show(
+        self, title: str, results=4, year: int | None = None
+    ) -> list[SearchResult]:
+        res = self.__search(title, "SHOW", results, year)
+
+        return res
+
+    def __search(
+        self, title, objectType: str, results=1, year: int | None = None
+    ) -> list[SearchResult]:
+
+        from .queries import SEARCH_QUERY as query
+
+        filter = {}
+
+        filter["searchQuery"] = title
+        filter["objectTypes"] = [objectType]
+        if year != None:
+            filter["releaseYear"] = {
+                "min": year,
+                "max": year,
+            }
+
+        request = {
+            "operationName": "GetSearchTitles",
+            "query": query,
+            "variables": {
+                "first": results,
+                "searchTitlesFilter": filter,
+                "language": self._language,
+                "country": self._country,
+            },
+        }
+
+        response = post(self.graphql_url, json=request)
+
+        ret = []
+        for node in response.json()["data"]["popularTitles"]["edges"]:
+            ret.append(SearchResult(node["node"]))
+
+        return ret
+
+    def __get_providers(
+        self, jwid: str, providers: list[str] = [], forceFlatrate: bool = False
+    ):
+
+        from .queries import OFFER_QUERY as query
+
+        # MONETIZATION_TYPES = ["FLATRATE", "RENT", "BUY", "ADS", "FREE"]
+        # PRESENTATION_TYPES = ["SD", "HD", "_4K"]
+        filter = {}
+
+        filter["bestOnly"] = True
+
+        if forceFlatrate:
+            filter["monetizationTypes"] = ["FLATRATE"]
+        if len(providers) > 0:
+            filter["packages"] = providers
+
+        request = {
+            "operationName": "GetTitleOffers",
+            "query": query,
+            "variables": {
+                "nodeId": jwid,
+                "language": self._language,
+                "country": self._country,
+                "offerFilter": filter,
+            },
+        }
+
+        response = post(self.graphql_url, json=request)
+
+        offers = []
+
+        return response.json()

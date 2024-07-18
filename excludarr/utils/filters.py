@@ -1,6 +1,9 @@
 import datetime
 import itertools
 
+# from simplejustwatchapi.query import MediaEntry
+from ..modules.justwatch.models import SearchResult, Offer
+
 
 def flatten(lst):
     return list(set(itertools.chain.from_iterable(lst)))
