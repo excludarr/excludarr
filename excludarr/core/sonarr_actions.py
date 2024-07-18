@@ -56,9 +56,7 @@ class SonarrActions:
         logger.debug(f"Could not find {title} using IMDB ID: {imdb_id}")
         return None
 
-    # TODO: fix this
     def _find_using_tvdb_id(self, title, sonarr_id, tvdb_id, fast, jw_query_payload={}):
-        return None, None
 
         # Log the title and Sonarr ID
         logger.debug(
@@ -67,9 +65,8 @@ class SonarrActions:
 
         # Log the JustWatch API call function
         logger.debug(f"Query JustWatch API with title: {title}")
-        jw_query_data = self.justwatch_client.query_title(
-            title, "show", fast, jw_query_payload
-        )
+        
+        jw_shows = self.justwatch_client.search_show(title)
 
         # Get TMDB ID from TMDB using the TVDB ID
         logger.debug(
@@ -84,22 +81,23 @@ class SonarrActions:
             tmdb_id = int(tmdb_find_result[0].get("id", 0))
 
         if tmdb_id != 0:
-            for entry in jw_query_data["items"]:
-                jw_id = entry["id"]
-                jw_serie_data, _, jw_tmdb_ids = self._get_jw_serie_data(title, entry)
+            for entry in jw_shows:
+                jw_id = entry.id
+                # jw_serie_data, _, jw_tmdb_ids = self._get_jw_serie_data(title, entry)
+                jw_tmdb_id = entry.tmdbId
 
                 # Break if the TMBD_ID in the query of JustWatch matches the one in Sonarr
-                if tmdb_id in jw_tmdb_ids:
+                if tmdb_id == jw_tmdb_id:
                     logger.debug(
                         f"Found JustWatch ID: {jw_id} for {title} with TMDB ID: {tmdb_id}"
                     )
-                    return jw_id, jw_serie_data
+                    return entry
 
         else:
             logger.debug("Could not find a TMDB ID")
 
         logger.debug(f"Could not find {title} using TVDB ID: {tvdb_id}")
-        return None, None
+        return None
 
     def _find_serie(self, serie, jw_providers, tmdb_api_key, fast, exclude):
         # Set the minimal base variables
@@ -141,14 +139,14 @@ class SonarrActions:
             )
             if not show and tvdb_id and tmdb_api_key:
                 logger.debug(f"Could not find {title} using IMDB, falling back to TMDB")
-                jw_id, jw_serie_data = self._find_using_tvdb_id(
+                show = self._find_using_tvdb_id(
                     title, sonarr_id, tvdb_id, fast
                 )
         elif tvdb_id and tmdb_api_key:
             # If the user has filled in an TMDB ID fall back to querying TMDB API using the TVDB ID
-            # show = self._find_using_tvdb_id(
-            #     title, sonarr_id, tvdb_id, fast, jw_query_payload
-            # )
+            show = self._find_using_tvdb_id(
+                title, sonarr_id, tvdb_id, fast, jw_query_payload
+            )
             print("kek")
         else:
             # Skip this serie if no IMDB ID and TVDB ID are found
