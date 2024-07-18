@@ -2,7 +2,7 @@ import datetime
 import itertools
 
 # from simplejustwatchapi.query import MediaEntry
-from ..modules.justwatch.models import MovieSearchResult, ShowSearchResult, Offer
+from ..modules.justwatch.models import SearchResult, Offer
 
 
 def flatten(lst):

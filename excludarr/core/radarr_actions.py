@@ -50,8 +50,7 @@ class RadarrActions:
 
         # Log the JustWatch API call function
         logger.debug(f"Query JustWatch API with title: {title}")
-        titles = self.justwatch_client.query_title(title, "movie", fast)
-        # logger.debug(f"{jw_query_data=}")
+        titles = self.justwatch_client.search_movie(title)
 
         for entry in titles:
             jw_imdb_id = entry.imdbId
@@ -64,9 +63,11 @@ class RadarrActions:
                 logger.debug(
                     f"Found JustWatch IMDB ID: {jw_imdb_id} for {title} with Radarr IMDB ID: {imdb_id}"
                 )
+                
+                #TODO: implement fast
 
                 # search providers
-                offers = self.justwatch_client.query_jwid_providers(entry.id, providers)
+                offers = self.justwatch_client.query_movie_offers(entry.id, providers)
 
                 return (entry, offers)
         logger.debug(f"Not found title: {title}")

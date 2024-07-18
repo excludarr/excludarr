@@ -1,3 +1,6 @@
+from typing import Dict, List
+
+
 class SearchResult:
     id: str
     objectType: str
@@ -19,36 +22,11 @@ class SearchResult:
         self.tmdbId = int(tmdbId) if tmdbId != None else None
 
 
-class MovieSearchResult(SearchResult):
-    def __init__(self, json):
-        super().__init__(json)
+# flat offers list
+type MovieOffers = List[Offer]
 
-
-class Season:
-    id: str
-    number: int
-    title: str
-
-    def __init__(self, id, number, title):
-        self.id = id
-        self.number = number
-        self.title = title
-
-
-class ShowSearchResult(SearchResult):
-    seasons: list[Season]
-
-    def __init__(self, json):
-        self.seasons: list[Season] = []
-
-        super().__init__(json)
-
-        if "seasons" in json:
-            for s in json["seasons"]:
-                self.seasons.append(
-                    Season(s["id"], s["content"]["seasonNumber"], s["content"]["title"])
-                )
-
+# season -> episode -> offers list
+type ShowOffers = Dict[int, Dict[int, List[Offer]]]
 
 class Offer:
     id: str
@@ -57,8 +35,8 @@ class Offer:
     providerClearName: str
     providertechnicalName: str
     providerShortName: str
-    subtitleLanguages: list[str]
-    audioLanguages: list[str]
+    subtitleLanguages: List[str]
+    audioLanguages: List[str]
 
     def __init__(self, json):
         self.__from_json(json)
