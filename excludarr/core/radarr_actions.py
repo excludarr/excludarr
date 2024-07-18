@@ -62,18 +62,28 @@ class RadarrActions:
 
         # Log the JustWatch API call function
         logger.debug(f"Query JustWatch API with title: {title}")
-        jw_query_data = self.justwatch_client.query_title(title, "movie", fast, **jw_query_payload)
+        titles = self.justwatch_client.search_movie(title)
 
-        for entry in jw_query_data["items"]:
-            jw_id = entry["id"]
-            jw_movie_data, jw_tmdb_ids = self._get_jw_movie_data(title, entry)
+        for entry in titles:
+            jw_imdb_id = entry.imdbId
+            jw_tmdb_id = entry.tmdbId
 
-            # Break if the TMBD_ID in the query of JustWatch matches the one in Radarr
-            if tmdb_id in jw_tmdb_ids:
-                logger.debug(f"Found JustWatch ID: {jw_id} for {title} with TMDB ID: {tmdb_id}")
-                return jw_id, jw_movie_data
+            # TODO: maybe also check year
+            if (imdb_id != None and imdb_id == jw_imdb_id) or (
+                tmdb_id != None and tmdb_id == jw_tmdb_id
+            ):
+                logger.debug(
+                    f"Found JustWatch IMDB ID: {jw_imdb_id} for {title} with Radarr IMDB ID: {imdb_id}"
+                )
+                
+                #TODO: implement fast
 
-        return None, None
+                # search providers
+                offers = self.justwatch_client.query_movie_offers(entry.id, providers)
+
+                return (entry, offers)
+        logger.debug(f"Not found title: {title}")
+        return None
 
     def get_movies_to_exclude(self, providers, fast=True, disable_progress=False):
         exclude_movies = {}
