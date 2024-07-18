@@ -26,29 +26,6 @@ class SonarrActions:
         logger.debug(f"Initializing JustWatch API with locale: {locale}")
         self.justwatch_client = JustWatch(locale)
 
-    def _get_jw_serie_data(self, title, jw_entry):
-        jw_id = jw_entry["id"]
-        jw_serie_data = {}
-        jw_imdb_ids = []
-        jw_tmdb_ids = []
-
-        try:
-            logger.debug(f"Querying JustWatch API with ID: {jw_id} for title: {title}")
-            jw_serie_data = self.justwatch_client.get_show(jw_id)
-
-            jw_imdb_ids = filters.get_imdb_ids(jw_serie_data.get("external_ids", []))
-            logger.debug(f"Got IMDB ID's: {jw_imdb_ids} from JustWatch API")
-
-            jw_tmdb_ids = filters.get_tmdb_ids(jw_serie_data.get("external_ids", []))
-            logger.debug(f"Got TMDB ID's: {jw_tmdb_ids} from JustWatch API")
-        except JustWatchNotFound:
-            logger.warning(f"Could not find title: {title} with JustWatch ID: {jw_id}")
-        except JustWatchTooManyRequests:
-            logger.error(f"JustWatch API returned 'Too Many Requests'")
-            # TODO: Raise error so typer can abort properly
-
-        return jw_serie_data, jw_imdb_ids, jw_tmdb_ids
-
     def _find_using_imdb_id(self, title, sonarr_id, imdb_id, fast, jw_query_payload={}):
         # Log the title and Sonarr ID
         logger.debug(
@@ -57,21 +34,25 @@ class SonarrActions:
 
         # Log the JustWatch API call function
         logger.debug(f"Query JustWatch API with title: {title}")
-        jw_query_data = self.justwatch_client.query_title(title, "show", fast, **jw_query_payload)
+        shows = self.justwatch_client.search_show(title)
 
-        for entry in jw_query_data["items"]:
-            jw_id = entry["id"]
-            jw_serie_data, jw_imdb_ids, _ = self._get_jw_serie_data(title, entry)
+        for entry in shows:
+            jw_id = entry.id
+            jw_imdb_ids = entry.imdbId
 
             # Break if the TMBD_ID in the query of JustWatch matches the one in Sonarr
-            if imdb_id in jw_imdb_ids:
+            if jw_imdb_ids != None and imdb_id in jw_imdb_ids:
                 logger.debug(f"Found JustWatch ID: {jw_id} for {title} with IMDB ID: {imdb_id}")
-                return jw_id, jw_serie_data
+                return entry
 
         logger.debug(f"Could not find {title} using IMDB ID: {imdb_id}")
+        return None
+
+    # TODO: fix this
+    def _find_using_tvdb_id(self, title, sonarr_id, tvdb_id, fast, jw_query_payload={}):
         return None, None
 
-    def _find_using_tvdb_id(self, title, sonarr_id, tvdb_id, fast, jw_query_payload={}):
+
         # Log the title and Sonarr ID
         logger.debug(
             f"Processing title: {title} with Sonarr ID: {sonarr_id} and TVDB ID: {tvdb_id}"
@@ -130,8 +111,8 @@ class SonarrActions:
         logger.debug(f"{title} has IMDB ID: {imdb_id} and TVDB_ID: {tvdb_id}")
 
         # Set JustWatch return variables to None
-        jw_id = None
-        jw_serie_data = None
+        show = None
+        offers = None
 
         # Setup TMDB if there is an API key provided
         # TODO: set to init
@@ -140,24 +121,29 @@ class SonarrActions:
 
         if imdb_id:
             # Try extracting the data by using the IMDB ID
-            jw_id, jw_serie_data = self._find_using_imdb_id(
+            show = self._find_using_imdb_id(
                 title, sonarr_id, imdb_id, fast, jw_query_payload
             )
-            if not jw_serie_data and tvdb_id and tmdb_api_key:
+            if not show and tvdb_id and tmdb_api_key:
                 logger.debug(f"Could not find {title} using IMDB, falling back to TMDB")
                 jw_id, jw_serie_data = self._find_using_tvdb_id(title, sonarr_id, tvdb_id, fast)
         elif tvdb_id and tmdb_api_key:
             # If the user has filled in an TMDB ID fall back to querying TMDB API using the TVDB ID
-            jw_id, jw_serie_data = self._find_using_tvdb_id(
-                title, sonarr_id, tvdb_id, fast, jw_query_payload
-            )
+            # show = self._find_using_tvdb_id(
+            #     title, sonarr_id, tvdb_id, fast, jw_query_payload
+            # )
+            print("kek")
         else:
             # Skip this serie if no IMDB ID and TVDB ID are found
             logger.debug(
                 f"No IMDB ID provided by Sonarr and no TMDB configuration set. Skipping serie: {title}"
             )
 
-        return jw_id, jw_serie_data
+        if show:
+            # TODO: implement forceFlatrate flag
+            offers = self.justwatch_client.query_show_offers(show.id, providers, True)
+
+        return show, offers
 
     def get_series_to_exclude(
         self, providers, fast=True, disable_progress=False, tmdb_api_key=None
@@ -191,33 +177,26 @@ class SonarrActions:
                 episodes = self.sonarr_client.get_episodes_by_series_id(sonarr_id)
 
                 # Get JustWatch serie data
-                jw_id, jw_serie_data = self._find_serie(
+                (show, offers) = self._find_serie(
                     serie, jw_providers, tmdb_api_key, fast, exclude=True
                 )
 
                 # Continue if the proper JustWatch ID is found
-                if jw_serie_data:
+                if show and offers:
                     logger.debug(f"Look up season data for {title}")
-                    jw_seasons = jw_serie_data["seasons"]
 
                     # Loop over the seasons
-                    for jw_season in jw_seasons:
-                        jw_season_title = jw_season.get(
-                            "title", f"Season {jw_season['season_number']}"
-                        )
-                        jw_season_id = jw_season["id"]
-                        jw_season_data = self.justwatch_client.get_season(jw_season_id)
-                        jw_episodes = jw_season_data.get("episodes", [])
+                    for (jw_season_idx, jw_season) in offers.items():
 
-                        logger.debug(f"Processing season {jw_season_title} of {title}")
+                        logger.debug(f"Processing season {jw_season_idx} of {title}")
 
                         # Loop over the episodes and check if there are providers
-                        for episode in jw_episodes:
-                            season_number = episode["season_number"]
-                            episode_number = episode["episode_number"]
+                        for (jw_episode_idx, jw_episode) in jw_season.items():
+                            season_number = jw_season_idx
+                            episode_number = jw_episode_idx
 
                             # Get episode providers
-                            episode_providers = filters.get_jw_providers(episode)
+                            episode_providers = filters.get_jw_providers(jw_episode)
 
                             # Check if the providers of the episodes matches the configured providers
                             providers_match = [
@@ -242,7 +221,7 @@ class SonarrActions:
                                             "filesize": filesize,
                                             "release_year": release_year,
                                             "ended": ended,
-                                            "jw_id": jw_id,
+                                            "jw_id": show.id,
                                             "sonarr_object": serie,
                                             "sonarr_file_ids": exclude_series[sonarr_id][
                                                 "sonarr_file_ids"
@@ -364,33 +343,26 @@ class SonarrActions:
                 episodes = self.sonarr_client.get_episodes_by_series_id(sonarr_id)
 
                 # Get JustWatch serie data
-                jw_id, jw_serie_data = self._find_serie(
-                    serie, jw_providers, tmdb_api_key, fast, exclude=False
+                (show, offers) = self._find_serie(
+                    serie, jw_providers, tmdb_api_key, fast, exclude=True
                 )
 
                 # Continue if the proper JustWatch ID is found
-                if jw_serie_data:
+                if show and offers:
                     logger.debug(f"Look up season data for {title}")
-                    jw_seasons = jw_serie_data["seasons"]
 
                     # Loop over the seasons
-                    for jw_season in jw_seasons:
-                        jw_season_title = jw_season.get(
-                            "title", f"Season {jw_season['season_number']}"
-                        )
-                        jw_season_id = jw_season["id"]
-                        jw_season_data = self.justwatch_client.get_season(jw_season_id)
-                        jw_episodes = jw_season_data.get("episodes", [])
+                    for (jw_season_idx, jw_season) in offers.items():
 
-                        logger.debug(f"Processing season {jw_season_title} of {title}")
+                        logger.debug(f"Processing season {jw_season_idx} of {title}")
 
                         # Loop over the episodes and check if there are providers
-                        for episode in jw_episodes:
-                            season_number = episode["season_number"]
-                            episode_number = episode["episode_number"]
+                        for (jw_episode_idx, jw_episode) in jw_season.items():
+                            season_number = jw_season_idx
+                            episode_number = jw_episode_idx
 
                             # Get episode providers
-                            episode_providers = filters.get_jw_providers(episode)
+                            episode_providers = filters.get_jw_providers(jw_episode)
 
                             # Check if the providers of the episodes matches the configured providers
                             providers_match = [
@@ -411,7 +383,7 @@ class SonarrActions:
                                             "title": title,
                                             "release_year": release_year,
                                             "ended": ended,
-                                            "jw_id": jw_id,
+                                            "jw_id": show.id,
                                             "sonarr_object": serie,
                                             "episodes": re_add_series[sonarr_id]["episodes"]
                                             + [

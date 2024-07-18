@@ -16,7 +16,7 @@ app = typer.Typer()
 @app.command(help="Exclude TV shows in Sonarr by deleting or not monitoring them")
 def exclude(
     providers: Optional[List[str]] = typer.Option(
-        None,
+        [],
         "-p",
         "--provider",
         metavar="PROVIDER",
@@ -191,7 +191,7 @@ def exclude(
 @app.command(help="Change status of series to monitored if no provider is found")
 def re_add(
     providers: Optional[List[str]] = typer.Option(
-        None,
+        [],
         "-p",
         "--provider",
         metavar="PROVIDER",
