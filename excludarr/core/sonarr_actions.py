@@ -6,7 +6,10 @@ import excludarr.modules.pytmdb as pytmdb
 import excludarr.utils.filters as filters
 
 from excludarr.modules.justwatch import JustWatch
-from excludarr.modules.justwatch.exceptions import JustWatchNotFound, JustWatchTooManyRequests
+from excludarr.modules.justwatch.exceptions import (
+    JustWatchNotFound,
+    JustWatchTooManyRequests,
+)
 
 
 def upd_episode(self, id, data):
@@ -19,6 +22,9 @@ SonarrAPI.upd_episode = upd_episode
 
 
 class SonarrActions:
+    sonarr_client: SonarrAPI
+    justwatch_client: JustWatch
+
     def __init__(self, url, api_key, locale):
         logger.debug(f"Initializing PySonarr")
         self.sonarr_client = SonarrAPI(url, api_key, ver_uri="/v3")
@@ -42,7 +48,9 @@ class SonarrActions:
 
             # Break if the TMBD_ID in the query of JustWatch matches the one in Sonarr
             if jw_imdb_ids != None and imdb_id in jw_imdb_ids:
-                logger.debug(f"Found JustWatch ID: {jw_id} for {title} with IMDB ID: {imdb_id}")
+                logger.debug(
+                    f"Found JustWatch ID: {jw_id} for {title} with IMDB ID: {imdb_id}"
+                )
                 return entry
 
         logger.debug(f"Could not find {title} using IMDB ID: {imdb_id}")
@@ -52,7 +60,6 @@ class SonarrActions:
     def _find_using_tvdb_id(self, title, sonarr_id, tvdb_id, fast, jw_query_payload={}):
         return None, None
 
-
         # Log the title and Sonarr ID
         logger.debug(
             f"Processing title: {title} with Sonarr ID: {sonarr_id} and TVDB ID: {tvdb_id}"
@@ -60,12 +67,18 @@ class SonarrActions:
 
         # Log the JustWatch API call function
         logger.debug(f"Query JustWatch API with title: {title}")
-        jw_query_data = self.justwatch_client.query_title(title, "show", fast, jw_query_payload)
+        jw_query_data = self.justwatch_client.query_title(
+            title, "show", fast, jw_query_payload
+        )
 
         # Get TMDB ID from TMDB using the TVDB ID
-        logger.debug(f"Trying to obtain the TMDB ID using TVDB ID: {tvdb_id} from TMDB API")
+        logger.debug(
+            f"Trying to obtain the TMDB ID using TVDB ID: {tvdb_id} from TMDB API"
+        )
         tmdb_id = 0
-        tmdb_find_result = self.tmdb.find.find_by_id(tvdb_id, "tvdb_id").get("tv_results", [])
+        tmdb_find_result = self.tmdb.find.find_by_id(tvdb_id, "tvdb_id").get(
+            "tv_results", []
+        )
         if tmdb_find_result:
             # Default to 0 if no ID is found
             tmdb_id = int(tmdb_find_result[0].get("id", 0))
@@ -77,7 +90,9 @@ class SonarrActions:
 
                 # Break if the TMBD_ID in the query of JustWatch matches the one in Sonarr
                 if tmdb_id in jw_tmdb_ids:
-                    logger.debug(f"Found JustWatch ID: {jw_id} for {title} with TMDB ID: {tmdb_id}")
+                    logger.debug(
+                        f"Found JustWatch ID: {jw_id} for {title} with TMDB ID: {tmdb_id}"
+                    )
                     return jw_id, jw_serie_data
 
         else:
@@ -126,7 +141,9 @@ class SonarrActions:
             )
             if not show and tvdb_id and tmdb_api_key:
                 logger.debug(f"Could not find {title} using IMDB, falling back to TMDB")
-                jw_id, jw_serie_data = self._find_using_tvdb_id(title, sonarr_id, tvdb_id, fast)
+                jw_id, jw_serie_data = self._find_using_tvdb_id(
+                    title, sonarr_id, tvdb_id, fast
+                )
         elif tvdb_id and tmdb_api_key:
             # If the user has filled in an TMDB ID fall back to querying TMDB API using the TVDB ID
             # show = self._find_using_tvdb_id(
@@ -174,7 +191,7 @@ class SonarrActions:
                 ended = serie["ended"]
 
                 # Get episodes of the serie
-                episodes = self.sonarr_client.get_episodes_by_series_id(sonarr_id)
+                episodes = self.sonarr_client.get_episode(sonarr_id, True)
 
                 # Get JustWatch serie data
                 (show, offers) = self._find_serie(
@@ -186,12 +203,12 @@ class SonarrActions:
                     logger.debug(f"Look up season data for {title}")
 
                     # Loop over the seasons
-                    for (jw_season_idx, jw_season) in offers.items():
+                    for jw_season_idx, jw_season in offers.items():
 
                         logger.debug(f"Processing season {jw_season_idx} of {title}")
 
                         # Loop over the episodes and check if there are providers
-                        for (jw_episode_idx, jw_episode) in jw_season.items():
+                        for jw_episode_idx, jw_episode in jw_season.items():
                             season_number = jw_season_idx
                             episode_number = jw_episode_idx
 
@@ -223,30 +240,34 @@ class SonarrActions:
                                             "ended": ended,
                                             "jw_id": show.id,
                                             "sonarr_object": serie,
-                                            "sonarr_file_ids": exclude_series[sonarr_id][
-                                                "sonarr_file_ids"
-                                            ]
-                                            + sonarr_episode_id
-                                            if exclude_series.get(sonarr_id)
-                                            else sonarr_episode_id,
-                                            "episodes": exclude_series[sonarr_id]["episodes"]
-                                            + [
-                                                {
-                                                    "season": season_number,
-                                                    "episode": episode_number,
-                                                    "providers": providers_match,
-                                                    **sonarr_episode_data,
-                                                }
-                                            ]
-                                            if exclude_series.get(sonarr_id)
-                                            else [
-                                                {
-                                                    "season": season_number,
-                                                    "episode": episode_number,
-                                                    "providers": providers_match,
-                                                    **sonarr_episode_data,
-                                                }
-                                            ],
+                                            "sonarr_file_ids": (
+                                                exclude_series[sonarr_id][
+                                                    "sonarr_file_ids"
+                                                ]
+                                                + sonarr_episode_id
+                                                if exclude_series.get(sonarr_id)
+                                                else sonarr_episode_id
+                                            ),
+                                            "episodes": (
+                                                exclude_series[sonarr_id]["episodes"]
+                                                + [
+                                                    {
+                                                        "season": season_number,
+                                                        "episode": episode_number,
+                                                        "providers": providers_match,
+                                                        **sonarr_episode_data,
+                                                    }
+                                                ]
+                                                if exclude_series.get(sonarr_id)
+                                                else [
+                                                    {
+                                                        "season": season_number,
+                                                        "episode": episode_number,
+                                                        "providers": providers_match,
+                                                        **sonarr_episode_data,
+                                                    }
+                                                ]
+                                            ),
                                         }
                                     }
                                 )
@@ -300,17 +321,23 @@ class SonarrActions:
 
             # Re order the exclude_series dict to strip the episodes if the whole season can be excluded
             updated_exclude_episodes = [
-                episode for episode in exclude_episodes if episode["season"] not in season_numbers
+                episode
+                for episode in exclude_episodes
+                if episode["season"] not in season_numbers
             ]
             exclude_series[exclude_id]["episodes"] = updated_exclude_episodes
             exclude_series[exclude_id]["seasons"] = seasons_to_exclude
-            exclude_series[exclude_id]["providers"] = filters.get_providers_from_seasons_episodes(
-                exclude_entry["seasons"], exclude_entry["episodes"]
+            exclude_series[exclude_id]["providers"] = (
+                filters.get_providers_from_seasons_episodes(
+                    exclude_entry["seasons"], exclude_entry["episodes"]
+                )
             )
 
         return exclude_series
 
-    def get_series_to_re_add(self, providers, fast=True, disable_progress=False, tmdb_api_key=None):
+    def get_series_to_re_add(
+        self, providers, fast=True, disable_progress=False, tmdb_api_key=None
+    ):
         re_add_series = {}
 
         # Setup TMDB if there is an API key provided
@@ -340,7 +367,7 @@ class SonarrActions:
                 ended = serie["ended"]
 
                 # Get episodes of the serie
-                episodes = self.sonarr_client.get_episodes_by_series_id(sonarr_id)
+                episodes = self.sonarr_client.get_episode(sonarr_id, True)
 
                 # Get JustWatch serie data
                 (show, offers) = self._find_serie(
@@ -352,12 +379,12 @@ class SonarrActions:
                     logger.debug(f"Look up season data for {title}")
 
                     # Loop over the seasons
-                    for (jw_season_idx, jw_season) in offers.items():
+                    for jw_season_idx, jw_season in offers.items():
 
                         logger.debug(f"Processing season {jw_season_idx} of {title}")
 
                         # Loop over the episodes and check if there are providers
-                        for (jw_episode_idx, jw_episode) in jw_season.items():
+                        for jw_episode_idx, jw_episode in jw_season.items():
                             season_number = jw_season_idx
                             episode_number = jw_episode_idx
 
@@ -385,22 +412,24 @@ class SonarrActions:
                                             "ended": ended,
                                             "jw_id": show.id,
                                             "sonarr_object": serie,
-                                            "episodes": re_add_series[sonarr_id]["episodes"]
-                                            + [
-                                                {
-                                                    "season": season_number,
-                                                    "episode": episode_number,
-                                                    **sonarr_episode_data,
-                                                }
-                                            ]
-                                            if re_add_series.get(sonarr_id)
-                                            else [
-                                                {
-                                                    "season": season_number,
-                                                    "episode": episode_number,
-                                                    **sonarr_episode_data,
-                                                }
-                                            ],
+                                            "episodes": (
+                                                re_add_series[sonarr_id]["episodes"]
+                                                + [
+                                                    {
+                                                        "season": season_number,
+                                                        "episode": episode_number,
+                                                        **sonarr_episode_data,
+                                                    }
+                                                ]
+                                                if re_add_series.get(sonarr_id)
+                                                else [
+                                                    {
+                                                        "season": season_number,
+                                                        "episode": episode_number,
+                                                        **sonarr_episode_data,
+                                                    }
+                                                ]
+                                            ),
                                         }
                                     }
                                 )
@@ -488,7 +517,9 @@ class SonarrActions:
 
         for episode_file in episode_file_ids:
             try:
-                logger.debug(f"Deleting episode ID: {episode_file} for serie with Sonarr ID: {id}")
+                logger.debug(
+                    f"Deleting episode ID: {episode_file} for serie with Sonarr ID: {id}"
+                )
                 self.sonarr_client.del_episode_file(episode_file)
             except Exception as e:
                 logger.error(e)
@@ -513,7 +544,9 @@ class SonarrActions:
     def disable_monitored_seasons(self, id, sonarr_object, seasons):
         logger.debug("Starting to disable monitoring on seasons")
 
-        updated_sonarr_object = filters.modify_sonarr_seasons(sonarr_object, seasons, False)
+        updated_sonarr_object = filters.modify_sonarr_seasons(
+            sonarr_object, seasons, False
+        )
 
         try:
             logger.debug(f"Updating serie with Sonarr ID: {id}")
@@ -527,23 +560,25 @@ class SonarrActions:
     def disable_monitored_episodes(self, id, episode_ids):
         logger.debug("Starting to disable monitoring on episodes")
 
-        for episode_id in episode_ids:
-            try:
-                logger.debug(
-                    f"Get details of episode with ID: {episode_id} for serie with Sonarr ID: {id}"
-                )
-                episode_object = self.sonarr_client.get_episode_by_episode_id(episode_id)
-                episode_object["monitored"] = False
+        logger.debug(
+            f"Updating episodes with IDs: {episode_ids} for serie with Sonarr ID: {id}"
+        )
 
-                logger.debug(
-                    f"Updating episode with ID: {episode_id} for serie with Sonarr ID: {id}"
-                )
-                self.sonarr_client.upd_episode(episode_id, episode_object)
-            except Exception as e:
-                logger.error(e)
-                logger.error(
-                    f"Something went wrong with updating the episode with ID: {episode_id} in Sonarr, check the configuration or try --debug for more information"
-                )
+        try:
+
+            self.sonarr_client.upd_episode_monitor(episode_ids, False)
+
+        except Exception as e:
+            logger.error(e)
+            logger.error(
+                f"Something went wrong with updating the episode with IDs: {episode_ids} in Sonarr, check the configuration or try --debug for more information"
+            )
+
+            return
+
+        logger.debug(
+            f"Updated episode with ID: {episode_ids} for serie with Sonarr ID: {id}"
+        )
 
     def enable_monitored_serie(self, id, sonarr_object):
         logger.debug("Starting to enable monitoring on serie")
@@ -562,7 +597,9 @@ class SonarrActions:
     def enable_monitored_seasons(self, id, sonarr_object, seasons):
         logger.debug("Starting to enable monitoring on seasons")
 
-        updated_sonarr_object = filters.modify_sonarr_seasons(sonarr_object, seasons, True)
+        updated_sonarr_object = filters.modify_sonarr_seasons(
+            sonarr_object, seasons, True
+        )
 
         try:
             logger.debug(f"Updating serie with Sonarr ID: {id}")
@@ -576,20 +613,22 @@ class SonarrActions:
     def enable_monitored_episodes(self, id, episode_ids):
         logger.debug("Starting to enable monitoring on episodes")
 
-        for episode_id in episode_ids:
-            try:
-                logger.debug(
-                    f"Get details of episode with ID: {episode_id} for serie with Sonarr ID: {id}"
-                )
-                episode_object = self.sonarr_client.get_episode_by_episode_id(episode_id)
-                episode_object["monitored"] = True
+        logger.debug(
+            f"Updating episodes with IDs: {episode_ids} for serie with Sonarr ID: {id}"
+        )
 
-                logger.debug(
-                    f"Updating episode with ID: {episode_id} for serie with Sonarr ID: {id}"
-                )
-                self.sonarr_client.upd_episode(episode_id, episode_object)
-            except Exception as e:
-                logger.error(e)
-                logger.error(
-                    f"Something went wrong with updating the episode with ID: {episode_id} in Sonarr, check the configuration or try --debug for more information"
-                )
+        try:
+
+            self.sonarr_client.upd_episode_monitor(episode_ids, True)
+
+        except Exception as e:
+            logger.error(e)
+            logger.error(
+                f"Something went wrong with updating the episode with IDs: {episode_ids} in Sonarr, check the configuration or try --debug for more information"
+            )
+
+            return
+
+        logger.debug(
+            f"Updated episode with ID: {episode_ids} for serie with Sonarr ID: {id}"
+        )
