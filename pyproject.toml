@@ -33,7 +33,6 @@ keywords = [
 ]
 include = [
     { path = ".examples/", format = ["sdist"] },
-    { path = "./docker-compose.yml", format = ["sdist"] },
     { path = "./Dockerfile", format = ["sdist"] },
     { path = "./entrypoint.sh", format = ["sdist"] },
 
