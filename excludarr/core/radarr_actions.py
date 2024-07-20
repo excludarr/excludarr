@@ -75,8 +75,8 @@ class RadarrActions:
                 logger.debug(
                     f"Found JustWatch IMDB ID: {jw_imdb_id} for {title} with Radarr IMDB ID: {imdb_id}"
                 )
-                
-                #TODO: implement fast
+
+                # TODO: implement fast
 
                 # search providers
                 offers = self.justwatch_client.query_movie_offers(entry.id, providers)

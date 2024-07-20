@@ -17,11 +17,15 @@ def print_movies_to_exclude(movies, total_filesize):
     console = Console()
 
     # Setup table
-    table = Table(show_footer=True, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False)
+    table = Table(
+        show_footer=True, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False
+    )
     with Live(table, console=console, screen=False):
         # Setup table columns and totals
         table.add_column("Release Date") or "Unknown"
-        table.add_column("Title", Text.from_markup("[b][i]Total Used Diskspace", justify="right"))
+        table.add_column(
+            "Title", Text.from_markup("[b][i]Total Used Diskspace", justify="right")
+        )
         table.add_column("Used Diskspace", filters.get_filesize_gb(total_filesize))
         table.add_column("Streaming Providers")
 
@@ -40,7 +44,9 @@ def print_movies_to_re_add(movies):
     console = Console()
 
     # Setup table
-    table = Table(show_footer=False, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False)
+    table = Table(
+        show_footer=False, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False
+    )
     with Live(table, console=console, screen=False):
         # Setup table columns
         table.add_column("Release Date")
@@ -59,11 +65,15 @@ def print_series_to_exclude(series, total_filesize):
     console = Console()
 
     # Setup table
-    table = Table(show_footer=True, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False)
+    table = Table(
+        show_footer=True, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False
+    )
     with Live(table, console=console, screen=False):
         # Setup table columns and totals
         table.add_column("Release Year")
-        table.add_column("Title", Text.from_markup("[b][i]Total Used Diskspace", justify="right"))
+        table.add_column(
+            "Title", Text.from_markup("[b][i]Total Used Diskspace", justify="right")
+        )
         table.add_column("Used Diskspace", filters.get_filesize_gb(total_filesize))
         table.add_column("Seasons")
         table.add_column("Episodes")
@@ -83,7 +93,14 @@ def print_series_to_exclude(series, total_filesize):
 
             # Add table rows
             table.add_row(
-                release_year, title, diskspace, season, episodes, providers, ended, full_delete
+                release_year,
+                title,
+                diskspace,
+                season,
+                episodes,
+                providers,
+                ended,
+                full_delete,
             )
 
 
@@ -92,7 +109,9 @@ def print_series_to_re_add(series):
     console = Console()
 
     # Setup table
-    table = Table(show_footer=False, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False)
+    table = Table(
+        show_footer=False, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False
+    )
     with Live(table, console=console, screen=False):
         # Setup table columns
         table.add_column("Release Year")
@@ -117,7 +136,9 @@ def print_providers(providers):
     console = Console()
 
     # Setup table
-    table = Table(show_footer=False, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False)
+    table = Table(
+        show_footer=False, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False
+    )
     with Live(table, console=console, screen=False):
         # Setup table columns
         table.add_column("JustWatch ID")
@@ -138,7 +159,8 @@ def ask_confirmation(action, kind):
         )
     elif action == Action.not_monitored:
         confirmation = Confirm.ask(
-            f"Are you sure you want to change the listed {kind} to not-monitored?", default=False
+            f"Are you sure you want to change the listed {kind} to not-monitored?",
+            default=False,
         )
     elif action == "re-add":
         confirmation = Confirm.ask(

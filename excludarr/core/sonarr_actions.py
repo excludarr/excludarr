@@ -56,7 +56,7 @@ class SonarrActions:
 
         # Log the JustWatch API call function
         logger.debug(f"Query JustWatch API with title: {title}")
-        
+
         jw_shows = self.justwatch_client.search_show(title)
 
         # Get TMDB ID from TMDB using the TVDB ID
@@ -130,9 +130,7 @@ class SonarrActions:
             )
             if not show and tvdb_id and tmdb_api_key:
                 logger.debug(f"Could not find {title} using IMDB, falling back to TMDB")
-                show = self._find_using_tvdb_id(
-                    title, sonarr_id, tvdb_id, fast
-                )
+                show = self._find_using_tvdb_id(title, sonarr_id, tvdb_id, fast)
         elif tvdb_id and tmdb_api_key:
             # If the user has filled in an TMDB ID fall back to querying TMDB API using the TVDB ID
             show = self._find_using_tvdb_id(
