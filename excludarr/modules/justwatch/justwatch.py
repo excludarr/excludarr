@@ -19,14 +19,14 @@ class JustWatch(object):
     _locale: str
     _language: str
     _country: str
-    
+
     base_url: str = "https://apis.justwatch.com/content"
     graphql_url: str = "https://apis.justwatch.com/graphql"
-    
+
     def __init__(self, locale, ssl_verify=True):
         self.ssl_verify = ssl_verify
 
-        # TODO: understand how to write this retry strategy with httpx        
+        # TODO: understand how to write this retry strategy with httpx
         # # Setup retries on failure
         # retries = Retry(
         #     total=5,
@@ -34,7 +34,7 @@ class JustWatch(object):
         #     status_forcelist=[429, 500, 502, 503, 504],
         #     allowed_methods=["GET", "POST"],
         # )
-        
+
         self.httpx_client = httpx.Client(http2=True, verify=ssl_verify)
 
         # Setup locale by verifying its input
@@ -71,7 +71,7 @@ class JustWatch(object):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
         }
         url = self._build_url(path)
-        
+
         request = self.httpx_client.build_request(
             method, url, headers=headers, json=json, params=params
         )
@@ -189,7 +189,7 @@ class JustWatch(object):
         }
 
         response = self.httpx_client.post(self.graphql_url, json=request)
-        
+
         filtered = self._filter_api_error(response)
 
         ret = []

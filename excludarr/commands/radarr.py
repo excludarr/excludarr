@@ -27,14 +27,18 @@ def exclude(
     locale: Optional[str] = typer.Option(
         None, "-l", "--locale", metavar="LOCALE", help="Your locale e.g: en_US."
     ),
-    action: Action = typer.Option(..., "-a", "--action", help="Change the status in Radarr."),
+    action: Action = typer.Option(
+        ..., "-a", "--action", help="Change the status in Radarr."
+    ),
     delete_files: bool = typer.Option(
         False, "-d", "--delete-files", help="Delete already downloaded files."
     ),
     exclusion: bool = typer.Option(
         False, "-e", "--exclusion", help="Add an exclusion to prevent auto importing."
     ),
-    yes: bool = typer.Option(False, "-y", "--yes", help="Auto accept the confirmation notice."),
+    yes: bool = typer.Option(
+        False, "-y", "--yes", help="Auto accept the confirmation notice."
+    ),
     progress: bool = typer.Option(
         False, "--progress", help="Track the progress using a progressbar."
     ),
@@ -67,7 +71,7 @@ def exclude(
 
     loglevel = ctx.obj.loglevel
     config = ctx.obj.config
-    
+
     # Disable the progress bar when debug logging is active
     if loglevel == 10:
         disable_progress = True
@@ -111,7 +115,9 @@ def exclude(
     # If there are movies to exclude
     if movies_to_exclude_ids:
         # Calculate total filesize
-        total_filesize = sum([movie["filesize"] for _, movie in movies_to_exclude.items()])
+        total_filesize = sum(
+            [movie["filesize"] for _, movie in movies_to_exclude.items()]
+        )
 
         # Print the movies in table format
         output.print_movies_to_exclude(movies_to_exclude, total_filesize)
@@ -120,7 +126,9 @@ def exclude(
         if not yes:
             confirmation = output.ask_confirmation(action, "movies")
             if not confirmation:
-                logger.warning("Aborting Excludarr because user did not confirm the question")
+                logger.warning(
+                    "Aborting Excludarr because user did not confirm the question"
+                )
                 raise typer.Abort()
         else:
             confirmation = True
@@ -130,7 +138,9 @@ def exclude(
             if action == Action.delete:
                 radarr.delete(movies_to_exclude_ids, delete_files, exclusion)
             elif action == Action.not_monitored:
-                movie_info = [movie["radarr_object"] for _, movie in movies_to_exclude.items()]
+                movie_info = [
+                    movie["radarr_object"] for _, movie in movies_to_exclude.items()
+                ]
                 radarr.disable_monitored(movie_info)
 
                 if delete_files:
@@ -138,7 +148,9 @@ def exclude(
 
             output.print_success_exclude(action, "movies")
     else:
-        rich.print("There are no more movies also available on the configured streaming providers!")
+        rich.print(
+            "There are no more movies also available on the configured streaming providers!"
+        )
 
 
 @app.command(help="Change status of movies to monitored if no provider is found")
@@ -154,7 +166,9 @@ def re_add(
     locale: Optional[str] = typer.Option(
         None, "-l", "--locale", metavar="LOCALE", help="Your locale e.g: en_US."
     ),
-    yes: bool = typer.Option(False, "-y", "--yes", help="Auto accept the confirmation notice."),
+    yes: bool = typer.Option(
+        False, "-y", "--yes", help="Auto accept the confirmation notice."
+    ),
     progress: bool = typer.Option(
         False, "--progress", help="Track the progress using a progressbar."
     ),
@@ -168,7 +182,7 @@ def re_add(
 
     loglevel = ctx.obj.loglevel
     config = ctx.obj.config
-    
+
     # Disable the progress bar when debug logging is active
     if loglevel == 10:
         disable_progress = True
@@ -187,7 +201,9 @@ def re_add(
     radarr = RadarrActions(config.radarr_url, config.radarr_api_key, locale)
 
     # Get the movies that should be re monitored
-    movies_to_re_add = radarr.get_movies_to_re_add(providers, config.fast_search, disable_progress)
+    movies_to_re_add = radarr.get_movies_to_re_add(
+        providers, config.fast_search, disable_progress
+    )
     movies_to_re_add = {
         id: values
         for id, values in movies_to_re_add.items()
@@ -206,14 +222,18 @@ def re_add(
         if not yes:
             confirmation = output.ask_confirmation("re-add", "movies")
             if not confirmation:
-                logger.warning("Aborting Excludarr because user did not confirm the question")
+                logger.warning(
+                    "Aborting Excludarr because user did not confirm the question"
+                )
                 raise typer.Abort()
         else:
             confirmation = True
 
         if confirmation:
             # Re-add the movies
-            movie_info = [movie["radarr_object"] for _, movie in movies_to_re_add.items()]
+            movie_info = [
+                movie["radarr_object"] for _, movie in movies_to_re_add.items()
+            ]
             radarr.enable_monitored(movie_info)
 
             rich.print(
@@ -232,17 +252,17 @@ def init(ctx: typer.Context):
     logger.debug("Got radarr as subcommand")
 
     # Hacky way to get the current log level context
-    loglevel = logger._core.min_level # type: ignore
+    loglevel = logger._core.min_level  # type: ignore
 
     logger.debug("Reading configuration file")
     config = Config()
-    
+
     ctx.obj = MyContext()
-    
+
     ctx.obj.config = config
     ctx.obj.loglevel = loglevel
 
 
 if __name__ == "__main__":
-    
+
     app()

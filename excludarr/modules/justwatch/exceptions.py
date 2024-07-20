@@ -1,8 +1,10 @@
 class JustWatchTooManyRequests(Exception):
     pass
 
+
 class JustWatchForbidden(Exception):
     pass
+
 
 class JustWatchNotFound(Exception):
     pass
@@ -10,6 +12,7 @@ class JustWatchNotFound(Exception):
 
 class JustWatchBadRequest(Exception):
     pass
+
 
 class JustWatchBadJSON(Exception):
     pass

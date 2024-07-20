@@ -15,7 +15,7 @@ def list(
     ctx: typer.Context,
     locale: Optional[str] = typer.Option(
         None, "-l", "--locale", metavar="LOCALE", help="Your locale e.g: en_US."
-    )
+    ),
 ):
     config = ctx.obj.config
     # Check if locale is set on CLI otherwise get the value from the config
@@ -36,12 +36,12 @@ def init(ctx: typer.Context):
     logger.debug("Got radarr as subcommand")
 
     # Hacky way to get the current log level context
-    loglevel = logger._core.min_level # type: ignore
+    loglevel = logger._core.min_level  # type: ignore
 
     logger.debug("Reading configuration file")
     config = Config()
-    
+
     ctx.obj = MyContext()
-    
+
     ctx.obj.config = config
     ctx.obj.loglevel = loglevel

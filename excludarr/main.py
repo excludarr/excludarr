@@ -12,15 +12,22 @@ from excludarr import __version__
 
 
 def sonarr_disabled_callback():
-    typer.echo("sonarr command is currently disabled. See https://github.com/excludarr/excludarr/issues/2 for more information.", file=sys.stderr)
+    typer.echo(
+        "sonarr command is currently disabled. See https://github.com/excludarr/excludarr/issues/2 for more information.",
+        file=sys.stderr,
+    )
     raise typer.Exit(1)
 
 
 app = typer.Typer()
 app.add_typer(radarr.app, name="radarr", help="Manages movies in Radarr.")
-app.add_typer(sonarr.app, name="sonarr", help="Manages TV shows, seasons and episodes in Sonarr.")
 app.add_typer(
-    providers.app, name="providers", help="List all the possible providers for your locale."
+    sonarr.app, name="sonarr", help="Manages TV shows, seasons and episodes in Sonarr."
+)
+app.add_typer(
+    providers.app,
+    name="providers",
+    help="List all the possible providers for your locale.",
 )
 
 
@@ -51,7 +58,9 @@ def _setup_logging(debug):
 @app.callback()
 def main(
     debug: bool = False,
-    version: Optional[bool] = typer.Option(None, "--version", callback=version_callback),
+    version: Optional[bool] = typer.Option(
+        None, "--version", callback=version_callback
+    ),
 ):
     """
     Excludarr is a CLI that interacts with Radarr and Sonarr instances. It completely
@@ -67,6 +76,7 @@ def main(
 
     # Logging
     logger.debug(f"Starting Excludarr v{__version__}")
+
 
 def cli():
     app(prog_name="excludarr")
