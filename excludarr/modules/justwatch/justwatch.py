@@ -1,18 +1,22 @@
-from typing import Any, Dict
+from typing import Any, Dict, List, TypeAlias, Union
 import httpx
 
 from json import JSONDecodeError
+from loguru import logger
 
 # from simplejustwatchapi.justwatch import search
 
 from .exceptions import (
     JustWatchBadJSON,
+    JustWatchGraphqlError,
     JustWatchTooManyRequests,
     JustWatchForbidden,
     JustWatchNotFound,
     JustWatchBadRequest,
 )
 from .models import MovieOffers, SearchResult, Offer, ShowOffers
+
+JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
 
 
 class JustWatch(object):
@@ -24,9 +28,7 @@ class JustWatch(object):
     base_url: str = "https://apis.justwatch.com/content"
     graphql_url: str = "https://apis.justwatch.com/graphql"
 
-    def __init__(self, locale, ssl_verify=True):
-        self.ssl_verify = ssl_verify
-
+    def __init__(self, locale, ssl_verify: bool = True):
         # TODO: understand how to write this retry strategy with httpx
         # # Setup retries on failure
         # retries = Retry(
@@ -45,10 +47,10 @@ class JustWatch(object):
     def __exit__(self, *args):
         self.httpx_client.close()
 
-    def _build_url(self, path):
+    def _build_url(self, path: str):
         return "{}{}".format(self.base_url, path)
 
-    def _filter_api_error(self, data):
+    def _filter_api_error(self, data: httpx.Response):
 
         if data.status_code == 400:
             raise JustWatchBadRequest(data.text)
@@ -60,13 +62,25 @@ class JustWatch(object):
             raise JustWatchTooManyRequests()
 
         try:
-            result_json = data.json()
+            j = data.json()
         except JSONDecodeError:
             raise JustWatchBadJSON(data.text)
 
-        return result_json
+        # TODO: write custom retry strategy based on graphql errors
+        #       we can't base out retry strategy on response codes because the
+        #       rpc always returns 200 if it is available, for now this will do
+        if "errors" in j:
+            raise JustWatchGraphqlError(data)
 
-    def _http_request(self, method, path, json=None, params=None):
+        return j
+
+    def _http_request(
+        self,
+        method: str,
+        path: str,
+        json: Any | None = None,
+        params: httpx.QueryParams | None = None,
+    ):
         # JustWatch returns a 403 without a reasonable User-Agent
         headers = {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
@@ -81,19 +95,29 @@ class JustWatch(object):
 
         return self._filter_api_error(result)
 
-    def _http_get(self, path, params=None):
+    def _http_get(self, path: str, params: httpx.QueryParams | None = None):
         return self._http_request("get", path, params=params)
 
-    def _http_post(self, path, json=None):
+    def _http_post(self, path: str, json: Any | None = None):
         return self._http_request("post", path, json=json)
 
-    def _http_put(self, path, params=None, json=None):
+    def _http_put(
+        self,
+        path: str,
+        json: Any | None = None,
+        params: httpx.QueryParams | None = None,
+    ):
         return self._http_request("put", path, params=params, json=json)
 
-    def _http_delete(self, path, json=None, params=None):
+    def _http_delete(
+        self,
+        path: str,
+        json: Any | None = None,
+        params: httpx.QueryParams | None = None,
+    ):
         return self._http_request("delete", path, json=json, params=params)
 
-    def _get_full_locale(self, locale):
+    def _get_full_locale(self, locale: str):
         default_locale = "en_US"
         path = "/locales/state"
 
@@ -119,11 +143,15 @@ class JustWatch(object):
         return self._http_get(path)
 
     def query_movie_offers(
-        self, jwid: str, providers: list[str] = [], forceFlatrate=False
-    ) -> MovieOffers:
-        result_json = self._get_providers(jwid, providers, forceFlatrate)
+        self, jwid: str, providers: List[str] = [], forceFlatrate=False
+    ) -> MovieOffers | None:
 
-        result = []
+        try:
+            result_json = self._get_providers(jwid, providers, forceFlatrate)
+        except:
+            return None
+
+        result: MovieOffers = []
 
         for offer in result_json["data"]["node"]["offers"]:
             result.append(Offer(offer))
@@ -131,18 +159,24 @@ class JustWatch(object):
         return result
 
     def query_show_offers(
-        self, jwid: str, providers: list[str] = [], forceFlatrate=False
-    ) -> ShowOffers:
-        result_json = self._get_providers(jwid, providers, forceFlatrate)
+        self, jwid: str, providers: List[str] = [], forceFlatrate=False
+    ) -> ShowOffers | None:
+
+        try:
+            result_json = self._get_providers(jwid, providers, forceFlatrate)
+        except:
+            return None
 
         result: ShowOffers = {}
 
         for season in result_json["data"]["node"]["seasons"]:
             season_n = season["content"]["seasonNumber"]
             result[season_n] = {}
+
             for episode in season["episodes"]:
                 episode_n = episode["content"]["episodeNumber"]
                 result[season_n][episode_n] = []
+
                 for offer in episode["offers"]:
                     result[season_n][episode_n].append(Offer(offer))
 
@@ -150,20 +184,23 @@ class JustWatch(object):
 
     def search_movie(
         self, title: str, results=4, year: int | None = None
-    ) -> list[SearchResult]:
-        res = self._search(title, "MOVIE", results, year)
-
-        return res
+    ) -> list[SearchResult] | None:
+        try:
+            return self._search(title, "MOVIE", results, year)
+        except:
+            return None
 
     def search_show(
         self, title: str, results=4, year: int | None = None
-    ) -> list[SearchResult]:
-        res = self._search(title, "SHOW", results, year)
+    ) -> list[SearchResult] | None:
 
-        return res
+        try:
+            return self._search(title, "SHOW", results, year)
+        except:
+            return None
 
     def _search(
-        self, title, objectType: str, results=1, year: int | None = None
+        self, title, objectType: str, results: int = 1, year: int | None = None
     ) -> list[SearchResult]:
 
         from .queries import SEARCH_QUERY as query
@@ -194,13 +231,13 @@ class JustWatch(object):
         filtered = self._filter_api_error(response)
 
         ret = []
-        for node in response.json()["data"]["popularTitles"]["edges"]:
+        for node in filtered["data"]["popularTitles"]["edges"]:
             ret.append(SearchResult(node["node"]))
 
         return ret
 
     def _get_providers(
-        self, jwid: str, providers: list[str] = [], forceFlatrate: bool = False
+        self, jwid: str, providers: List[str] = [], forceFlatrate: bool = False
     ):
 
         from .queries import OFFER_QUERY as query
@@ -216,7 +253,7 @@ class JustWatch(object):
         if len(providers) > 0:
             filter["packages"] = providers
 
-        request = {
+        request: Any = {
             "operationName": "GetTitleOffers",
             "query": query,
             "variables": {

@@ -33,16 +33,17 @@ class SonarrActions:
         logger.debug(f"Query JustWatch API with title: {title}")
         shows = self.justwatch_client.search_show(title)
 
-        for entry in shows:
-            jw_id = entry.id
-            jw_imdb_ids = entry.imdbId
+        if shows:
+            for entry in shows:
+                jw_id = entry.id
+                jw_imdb_ids = entry.imdbId
 
-            # Break if the TMBD_ID in the query of JustWatch matches the one in Sonarr
-            if jw_imdb_ids != None and imdb_id in jw_imdb_ids:
-                logger.debug(
-                    f"Found JustWatch ID: {jw_id} for {title} with IMDB ID: {imdb_id}"
-                )
-                return entry
+                # Break if the TMBD_ID in the query of JustWatch matches the one in Sonarr
+                if jw_imdb_ids != None and imdb_id in jw_imdb_ids:
+                    logger.debug(
+                        f"Found JustWatch ID: {jw_id} for {title} with IMDB ID: {imdb_id}"
+                    )
+                    return entry
 
         logger.debug(f"Could not find {title} using IMDB ID: {imdb_id}")
         return None
@@ -72,17 +73,18 @@ class SonarrActions:
             tmdb_id = int(tmdb_find_result[0].get("id", 0))
 
         if tmdb_id != 0:
-            for entry in jw_shows:
-                jw_id = entry.id
-                # jw_serie_data, _, jw_tmdb_ids = self._get_jw_serie_data(title, entry)
-                jw_tmdb_id = entry.tmdbId
+            if jw_shows:
+                for entry in jw_shows:
+                    jw_id = entry.id
+                    # jw_serie_data, _, jw_tmdb_ids = self._get_jw_serie_data(title, entry)
+                    jw_tmdb_id = entry.tmdbId
 
-                # Break if the TMBD_ID in the query of JustWatch matches the one in Sonarr
-                if tmdb_id == jw_tmdb_id:
-                    logger.debug(
-                        f"Found JustWatch ID: {jw_id} for {title} with TMDB ID: {tmdb_id}"
-                    )
-                    return entry
+                    # Break if the TMBD_ID in the query of JustWatch matches the one in Sonarr
+                    if tmdb_id == jw_tmdb_id:
+                        logger.debug(
+                            f"Found JustWatch ID: {jw_id} for {title} with TMDB ID: {tmdb_id}"
+                        )
+                        return entry
 
         else:
             logger.debug("Could not find a TMDB ID")

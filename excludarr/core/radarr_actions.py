@@ -49,24 +49,27 @@ class RadarrActions:
         logger.debug(f"Query JustWatch API with title: {title}")
         titles = self.justwatch_client.search_movie(title)
 
-        for entry in titles:
-            jw_imdb_id = entry.imdbId
-            jw_tmdb_id = entry.tmdbId
+        if titles:
+            for entry in titles:
+                jw_imdb_id = entry.imdbId
+                jw_tmdb_id = entry.tmdbId
 
-            # TODO: maybe also check year
-            if (imdb_id != None and imdb_id == jw_imdb_id) or (
-                tmdb_id != None and tmdb_id == jw_tmdb_id
-            ):
-                logger.debug(
-                    f"Found JustWatch IMDB ID: {jw_imdb_id} for {title} with Radarr IMDB ID: {imdb_id}"
-                )
+                # TODO: maybe also check year
+                if (imdb_id != None and imdb_id == jw_imdb_id) or (
+                    tmdb_id != None and tmdb_id == jw_tmdb_id
+                ):
+                    logger.debug(
+                        f"Found JustWatch IMDB ID: {jw_imdb_id} for {title} with Radarr IMDB ID: {imdb_id}"
+                    )
 
-                # TODO: implement fast
+                    # TODO: implement fast
 
-                # search providers
-                offers = self.justwatch_client.query_movie_offers(entry.id, providers)
+                    # search providers
+                    offers = self.justwatch_client.query_movie_offers(
+                        entry.id, providers
+                    )
 
-                return (entry, offers)
+                    return (entry, offers)
         logger.debug(f"Not found title: {title}")
         return None
 
@@ -113,7 +116,7 @@ class RadarrActions:
 
                 logger.debug(f"{found_movie=}")
 
-                if found_movie != None:
+                if found_movie and offers:
                     # Get all the providers the movie is streaming on
                     movie_providers = filters.get_jw_providers(offers)
 
@@ -195,7 +198,7 @@ class RadarrActions:
 
                 logger.debug(f"{found_movie=}")
 
-                if found_movie != None:
+                if found_movie and offers:
                     # Get all the providers the movie is streaming on
                     movie_providers = filters.get_jw_providers(offers)
 
