@@ -1,11 +1,8 @@
-from typing import List
 from loguru import logger
 from rich.progress import Progress
 from pyarr import RadarrAPI
 
 import excludarr.utils.filters as filters
-
-# from simplejustwatchapi.query import MediaEntry
 
 from excludarr.modules.justwatch import JustWatch
 from excludarr.modules.justwatch.exceptions import (

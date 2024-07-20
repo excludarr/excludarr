@@ -1,12 +1,11 @@
 import httpx
 
-from urllib3.util.retry import Retry
-from requests.adapters import HTTPAdapter
 from json import JSONDecodeError
 
 # from simplejustwatchapi.justwatch import search
 
 from .exceptions import (
+    JustWatchBadJSON,
     JustWatchTooManyRequests,
     JustWatchForbidden,
     JustWatchNotFound,
@@ -16,10 +15,15 @@ from .models import MovieOffers, SearchResult, Offer, ShowOffers
 
 
 class JustWatch(object):
+    httpx_client: httpx.Client
+    _locale: str
+    _language: str
+    _country: str
+    
+    base_url: str = "https://apis.justwatch.com/content"
+    graphql_url: str = "https://apis.justwatch.com/graphql"
+    
     def __init__(self, locale, ssl_verify=True):
-        # Setup base variables
-        self.base_url = "https://apis.justwatch.com/content"
-        self.graphql_url = "https://apis.justwatch.com/graphql"
         self.ssl_verify = ssl_verify
 
         # TODO: understand how to write this retry strategy with httpx        
@@ -57,7 +61,7 @@ class JustWatch(object):
         try:
             result_json = data.json()
         except JSONDecodeError:
-            return data.text
+            raise JustWatchBadJSON(data.text)
 
         return result_json
 
@@ -116,7 +120,7 @@ class JustWatch(object):
     def query_movie_offers(
         self, jwid: str, providers: list[str] = [], forceFlatrate=False
     ) -> MovieOffers:
-        result_json = self.__get_providers(jwid, providers, forceFlatrate)
+        result_json = self._get_providers(jwid, providers, forceFlatrate)
 
         result = []
 
@@ -128,9 +132,9 @@ class JustWatch(object):
     def query_show_offers(
         self, jwid: str, providers: list[str] = [], forceFlatrate=False
     ) -> ShowOffers:
-        result_json = self.__get_providers(jwid, providers, forceFlatrate)
+        result_json = self._get_providers(jwid, providers, forceFlatrate)
 
-        result = {}
+        result: ShowOffers = {}
 
         for season in result_json["data"]["node"]["seasons"]:
             season_n = season["content"]["seasonNumber"]
@@ -146,18 +150,18 @@ class JustWatch(object):
     def search_movie(
         self, title: str, results=4, year: int | None = None
     ) -> list[SearchResult]:
-        res = self.__search(title, "MOVIE", results, year)
+        res = self._search(title, "MOVIE", results, year)
 
         return res
 
     def search_show(
         self, title: str, results=4, year: int | None = None
     ) -> list[SearchResult]:
-        res = self.__search(title, "SHOW", results, year)
+        res = self._search(title, "SHOW", results, year)
 
         return res
 
-    def __search(
+    def _search(
         self, title, objectType: str, results=1, year: int | None = None
     ) -> list[SearchResult]:
 
@@ -185,6 +189,8 @@ class JustWatch(object):
         }
 
         response = self.httpx_client.post(self.graphql_url, json=request)
+        
+        filtered = self._filter_api_error(response)
 
         ret = []
         for node in response.json()["data"]["popularTitles"]["edges"]:
@@ -192,7 +198,7 @@ class JustWatch(object):
 
         return ret
 
-    def __get_providers(
+    def _get_providers(
         self, jwid: str, providers: list[str] = [], forceFlatrate: bool = False
     ):
 
@@ -222,4 +228,4 @@ class JustWatch(object):
 
         response = self.httpx_client.post(self.graphql_url, json=request)
 
-        return response.json()
+        return self._filter_api_error(response)

@@ -11,3 +11,5 @@ class JustWatchNotFound(Exception):
 class JustWatchBadRequest(Exception):
     pass
 
+class JustWatchBadJSON(Exception):
+    pass
