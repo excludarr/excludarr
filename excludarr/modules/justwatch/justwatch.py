@@ -1,3 +1,4 @@
+from typing import Any, Dict
 import httpx
 
 from json import JSONDecodeError
@@ -204,7 +205,7 @@ class JustWatch(object):
 
         # MONETIZATION_TYPES = ["FLATRATE", "RENT", "BUY", "ADS", "FREE"]
         # PRESENTATION_TYPES = ["SD", "HD", "_4K"]
-        filter = {}
+        filter: Dict[str, Any] = {}
 
         filter["bestOnly"] = True
 
