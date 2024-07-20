@@ -12,15 +12,6 @@ from excludarr.modules.justwatch.exceptions import (
 )
 
 
-def upd_episode(self, id, data):
-    path = f"episode/{id}"
-    return self.request_put(path, self.ver_uri, data=data)
-
-
-# Patch the upd_episode endpoint
-SonarrAPI.upd_episode = upd_episode
-
-
 class SonarrActions:
     sonarr_client: SonarrAPI
     justwatch_client: JustWatch

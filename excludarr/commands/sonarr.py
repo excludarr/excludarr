@@ -4,6 +4,7 @@ import typer
 from typing import List, Optional
 from loguru import logger
 
+from excludarr.commands import MyContext
 import excludarr.utils.output as output
 
 from excludarr.core.sonarr_actions import SonarrActions
@@ -15,7 +16,8 @@ app = typer.Typer()
 
 @app.command(help="Exclude TV shows in Sonarr by deleting or not monitoring them")
 def exclude(
-    providers: Optional[List[str]] = typer.Option(
+    ctx: typer.Context,
+    providers: List[str] = typer.Option(
         [],
         "-p",
         "--provider",
@@ -47,6 +49,9 @@ def exclude(
     logger.debug(f"Got CLI values for -y, --yes option: {yes}")
     logger.debug(f"Got CLI values for --progress option: {progress}")
 
+    loglevel = ctx.obj.loglevel
+    config = ctx.obj.config
+    
     # Disable the progress bar when debug logging is active
     if loglevel == 10:
         disable_progress = True
@@ -190,7 +195,8 @@ def exclude(
 
 @app.command(help="Change status of series to monitored if no provider is found")
 def re_add(
-    providers: Optional[List[str]] = typer.Option(
+    ctx: typer.Context,
+    providers: List[str] = typer.Option(
         [],
         "-p",
         "--provider",
@@ -212,6 +218,9 @@ def re_add(
     logger.debug(f"Got CLI values for -y, --yes option: {yes}")
     logger.debug(f"Got CLI values for --progress option: {progress}")
 
+    loglevel = ctx.obj.loglevel
+    config = ctx.obj.config
+    
     # Disable the progress bar when debug logging is active
     if loglevel == 10:
         disable_progress = True
@@ -312,21 +321,22 @@ def re_add(
 
 
 @app.callback()
-def init():
+def init(ctx: typer.Context):
     """
     Initializes the command. Reads the configuration.
     """
     logger.debug("Got sonarr as subcommand")
 
-    # Set globals
-    global config
-    global loglevel
-
     # Hacky way to get the current log level context
-    loglevel = logger._core.min_level
+    loglevel = logger._core.min_level # type: ignore
 
     logger.debug("Reading configuration file")
     config = Config()
+    
+    ctx.obj = MyContext()
+    
+    ctx.obj.config = config
+    ctx.obj.loglevel = loglevel
 
 
 if __name__ == "__main__":
