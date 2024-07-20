@@ -1,5 +1,4 @@
-import requests
-from httpx import post
+import httpx
 
 from urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
@@ -23,27 +22,23 @@ class JustWatch(object):
         self.graphql_url = "https://apis.justwatch.com/graphql"
         self.ssl_verify = ssl_verify
 
-        # Setup session
-        self.session = requests.Session()
-        self.session.verify = ssl_verify
-
-        # Setup retries on failure
-        retries = Retry(
-            total=5,
-            backoff_factor=0.5,
-            status_forcelist=[429, 500, 502, 503, 504],
-            allowed_methods=["GET", "POST"],
-        )
-
-        # self.session.mount("http://", HTTPAdapter(max_retries=retries))
-        self.session.mount("https://", HTTPAdapter(max_retries=retries))
+        # TODO: understand how to write this retry strategy with httpx        
+        # # Setup retries on failure
+        # retries = Retry(
+        #     total=5,
+        #     backoff_factor=0.5,
+        #     status_forcelist=[429, 500, 502, 503, 504],
+        #     allowed_methods=["GET", "POST"],
+        # )
+        
+        self.httpx_client = httpx.Client(http2=True, verify=ssl_verify)
 
         # Setup locale by verifying its input
         self._locale = self._get_full_locale(locale)
         [self._language, self._country] = self._locale.split("_")
 
     def __exit__(self, *args):
-        self.session.close()
+        self.httpx_client.close()
 
     def _build_url(self, path):
         return "{}{}".format(self.base_url, path)
@@ -72,12 +67,12 @@ class JustWatch(object):
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
         }
         url = self._build_url(path)
-        request = requests.Request(
+        
+        request = self.httpx_client.build_request(
             method, url, headers=headers, json=json, params=params
         )
 
-        prepped = self.session.prepare_request(request)
-        result = self.session.send(prepped)
+        result = self.httpx_client.send(request)
 
         return self._filter_api_error(result)
 
@@ -189,7 +184,7 @@ class JustWatch(object):
             },
         }
 
-        response = post(self.graphql_url, json=request)
+        response = self.httpx_client.post(self.graphql_url, json=request)
 
         ret = []
         for node in response.json()["data"]["popularTitles"]["edges"]:
@@ -225,8 +220,6 @@ class JustWatch(object):
             },
         }
 
-        response = post(self.graphql_url, json=request)
-
-        offers = []
+        response = self.httpx_client.post(self.graphql_url, json=request)
 
         return response.json()
