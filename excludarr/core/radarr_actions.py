@@ -64,24 +64,27 @@ class RadarrActions:
         logger.debug(f"Query JustWatch API with title: {title}")
         titles = self.justwatch_client.search_movie(title)
 
-        for entry in jw_query_data["items"]:
-            jw_id = entry["id"]
-            jw_movie_data, jw_tmdb_ids = self._get_jw_movie_data(title, entry)
+        if titles:
+            for entry in titles:
+                jw_imdb_id = entry.imdbId
+                jw_tmdb_id = entry.tmdbId
 
-            # TODO: maybe also check year
-            if (imdb_id != None and imdb_id == jw_imdb_id) or (
-                tmdb_id != None and tmdb_id == jw_tmdb_id
-            ):
-                logger.debug(
-                    f"Found JustWatch IMDB ID: {jw_imdb_id} for {title} with Radarr IMDB ID: {imdb_id}"
-                )
+                # TODO: maybe also check year
+                if (imdb_id != None and imdb_id == jw_imdb_id) or (
+                    tmdb_id != None and tmdb_id == jw_tmdb_id
+                ):
+                    logger.debug(
+                        f"Found JustWatch IMDB ID: {jw_imdb_id} for {title} with Radarr IMDB ID: {imdb_id}"
+                    )
 
-                # TODO: implement fast
+                    # TODO: implement fast
 
-                # search providers
-                offers = self.justwatch_client.query_movie_offers(entry.id, providers)
+                    # search providers
+                    offers = self.justwatch_client.query_movie_offers(
+                        entry.id, providers
+                    )
 
-                return (entry, offers)
+                    return (entry, offers)
         logger.debug(f"Not found title: {title}")
         return None
 
@@ -119,7 +122,7 @@ class RadarrActions:
                 # Find the movie
                 jw_id, jw_movie_data = self._find_movie(movie, jw_providers, fast, exclude=True)
 
-                if jw_movie_data:
+                if found_movie and offers:
                     # Get all the providers the movie is streaming on
                     movie_providers = filters.get_jw_providers(jw_movie_data)
 
@@ -185,9 +188,15 @@ class RadarrActions:
                 )
 
                 # Find the movie
-                jw_id, jw_movie_data = self._find_movie(movie, jw_providers, fast, exclude=False)
+                find_res = self._find_movie(movie, jw_providers, fast, exclude=True)
+                if find_res == None:
+                    continue
 
-                if jw_movie_data:
+                (found_movie, offers) = find_res
+
+                logger.debug(f"{found_movie=}")
+
+                if found_movie and offers:
                     # Get all the providers the movie is streaming on
                     movie_providers = filters.get_jw_providers(jw_movie_data)
 

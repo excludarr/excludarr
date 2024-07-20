@@ -17,7 +17,7 @@ def list(
         None, "-l", "--locale", metavar="LOCALE", help="Your locale e.g: en_US."
     ),
 ):
-    config = ctx.obj.config
+    config: Config = ctx.obj.config
     # Check if locale is set on CLI otherwise get the value from the config
     if not locale:
         locale = config.locale

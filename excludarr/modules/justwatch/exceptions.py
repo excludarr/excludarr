@@ -16,3 +16,7 @@ class JustWatchBadRequest(Exception):
 
 class JustWatchBadJSON(Exception):
     pass
+
+
+class JustWatchGraphqlError(Exception):
+    pass

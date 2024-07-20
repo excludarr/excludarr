@@ -69,8 +69,10 @@ def exclude(
     logger.debug(f"Got CLI values for -y, --yes option: {yes}")
     logger.debug(f"Got CLI values for --progress option: {progress}")
 
-    loglevel = ctx.obj.loglevel
-    config = ctx.obj.config
+    context: MyContext = ctx.obj
+
+    loglevel = context.loglevel
+    config = context.config
 
     # Disable the progress bar when debug logging is active
     if loglevel == 10:
@@ -180,8 +182,10 @@ def re_add(
     logger.debug(f"Got CLI values for -y, --yes option: {yes}")
     logger.debug(f"Got CLI values for --progress option: {progress}")
 
-    loglevel = ctx.obj.loglevel
-    config = ctx.obj.config
+    context: MyContext = ctx.obj
+
+    loglevel = context.loglevel
+    config = context.config
 
     # Disable the progress bar when debug logging is active
     if loglevel == 10:
@@ -257,10 +261,11 @@ def init(ctx: typer.Context):
     logger.debug("Reading configuration file")
     config = Config()
 
-    ctx.obj = MyContext()
+    context: MyContext = MyContext()
 
-    ctx.obj.config = config
-    ctx.obj.loglevel = loglevel
+    context.config = config
+    context.loglevel = loglevel
+    ctx.obj = context
 
 
 if __name__ == "__main__":
