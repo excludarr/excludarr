@@ -42,6 +42,13 @@ tmdb:
 EOF
 fi
 
+cat << EOF > /bin/excludarr
+#!/bin/bash
+poetry run -C /app excludarr
+EOF
+
+chmod +x /bin/excludarr
+
 if [ "$cron_mode" = true ]; then
     if test -f "/etc/excludarr/crontab"; then
         cp /etc/excludarr/crontab /var/spool/cron/crontabs/root
