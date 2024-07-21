@@ -6,10 +6,6 @@ import excludarr.modules.pytmdb as pytmdb
 import excludarr.utils.filters as filters
 
 from excludarr.modules.justwatch import JustWatch
-from excludarr.modules.justwatch.exceptions import (
-    JustWatchNotFound,
-    JustWatchTooManyRequests,
-)
 
 
 class SonarrActions:
@@ -17,7 +13,7 @@ class SonarrActions:
     justwatch_client: JustWatch
 
     def __init__(self, url, api_key, locale):
-        logger.debug(f"Initializing PySonarr")
+        logger.debug("Initializing PySonarr")
         self.sonarr_client = SonarrAPI(url, api_key, ver_uri="/v3")
 
         logger.debug(f"Initializing JustWatch API with locale: {locale}")
@@ -39,7 +35,7 @@ class SonarrActions:
                 jw_imdb_ids = entry.imdbId
 
                 # Break if the TMBD_ID in the query of JustWatch matches the one in Sonarr
-                if jw_imdb_ids != None and imdb_id in jw_imdb_ids:
+                if jw_imdb_ids is not None and imdb_id in jw_imdb_ids:
                     logger.debug(
                         f"Found JustWatch ID: {jw_id} for {title} with IMDB ID: {imdb_id}"
                     )
@@ -498,11 +494,11 @@ class SonarrActions:
         except Exception as e:
             logger.error(e)
             logger.error(
-                f"Something went wrong with deleting the serie from Sonarr, check the configuration or try --debug for more information"
+                "Something went wrong with deleting the serie from Sonarr, check the configuration or try --debug for more information"
             )
 
     def delete_episode_files(self, id, episode_file_ids):
-        logger.debug(f"Starting the delete episodefile process")
+        logger.debug("Starting the delete episodefile process")
 
         for episode_file in episode_file_ids:
             try:
