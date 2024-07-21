@@ -14,7 +14,9 @@ from excludarr.utils.enums import Action
 app = typer.Typer()
 
 
-@app.command(help="Exclude movies in Radarr by deleting or not monitoring them")
+@app.command(
+    help="Exclude movies in Radarr by deleting or not monitoring them"
+)
 def exclude(
     ctx: typer.Context,
     providers: List[str] = typer.Option(
@@ -25,7 +27,11 @@ def exclude(
         help="Override the configured streaming providers.",
     ),
     locale: Optional[str] = typer.Option(
-        None, "-l", "--locale", metavar="LOCALE", help="Your locale e.g: en_US."
+        None,
+        "-l",
+        "--locale",
+        metavar="LOCALE",
+        help="Your locale e.g: en_US.",
     ),
     action: Action = typer.Option(
         ..., "-a", "--action", help="Change the status in Radarr."
@@ -34,7 +40,10 @@ def exclude(
         False, "-d", "--delete-files", help="Delete already downloaded files."
     ),
     exclusion: bool = typer.Option(
-        False, "-e", "--exclusion", help="Add an exclusion to prevent auto importing."
+        False,
+        "-e",
+        "--exclusion",
+        help="Add an exclusion to prevent auto importing.",
     ),
     yes: bool = typer.Option(
         False, "-y", "--yes", help="Auto accept the confirmation notice."
@@ -44,11 +53,12 @@ def exclude(
     ),
 ):
     """
-    Radarr exclude function. This function handles the CLI input and determines which
-    action (delete/not-monitored) should be executed. The function gathers all information
-    from Radarr and checks if there is a match with the JustWatch API. Based on the results a
-    table is printed and the user is asked for confirmation. Based on the CLI options the
-    files in Radarr are also deleted.
+    Radarr exclude function. This function handles the CLI input and determines
+    which action (delete/not-monitored) should be executed. The function
+    gathers all information from Radarr and checks if there is a match with the
+    JustWatch API. Based on the results a table is printed and the user is
+    asked for confirmation. Based on the CLI options the files in Radarr are
+    also deleted.
 
     :param providers: A list of providers that should overwrite the configuration settings
     :param locale: The locale in en_US or two letter country code US
@@ -58,10 +68,13 @@ def exclude(
     :param yes: Skip the confirmation notice and continue without user input
     :param progress: Show a progress bar, only works when no --debug flag is set
     :return: None
-    """
+    """  # noqa: E501
+
     # Debug logging
     logger.debug("Got exclude as subcommand")
-    logger.debug(f"Got CLI values for -p, --provider option: {', '.join(providers)}")
+    logger.debug(
+        f"Got CLI values for -p, --provider option: {', '.join(providers)}"
+    )
     logger.debug(f"Got CLI values for -l, --locale option: {locale}")
     logger.debug(f"Got CLI values for -a, --action option: {action}")
     logger.debug(f"Got CLI values for -d, --delete option: {delete_files}")
@@ -91,7 +104,8 @@ def exclude(
     # Setup Radarr Actions to control the different tasks
     radarr = RadarrActions(config.radarr_url, config.radarr_api_key, locale)
 
-    # Get the movies to exclude and exclude the movies that are in the exclude list
+    # Get the movies to exclude and exclude the movies that are in the exclude
+    # list
     movies_to_exclude = radarr.get_movies_to_exclude(
         providers, config.fast_search, disable_progress
     )
@@ -129,7 +143,7 @@ def exclude(
             confirmation = output.ask_confirmation(action, "movies")
             if not confirmation:
                 logger.warning(
-                    "Aborting Excludarr because user did not confirm the question"
+                    "Aborting Excludarr because user did not confirm the question"  # noqa: E501
                 )
                 raise typer.Abort()
         else:
@@ -141,7 +155,8 @@ def exclude(
                 radarr.delete(movies_to_exclude_ids, delete_files, exclusion)
             elif action == Action.not_monitored:
                 movie_info = [
-                    movie["radarr_object"] for _, movie in movies_to_exclude.items()
+                    movie["radarr_object"]
+                    for _, movie in movies_to_exclude.items()
                 ]
                 radarr.disable_monitored(movie_info)
 
@@ -151,11 +166,13 @@ def exclude(
             output.print_success_exclude(action, "movies")
     else:
         rich.print(
-            "There are no more movies also available on the configured streaming providers!"
+            "There are no more movies also available on the configured streaming providers!"  # noqa: E501
         )
 
 
-@app.command(help="Change status of movies to monitored if no provider is found")
+@app.command(
+    help="Change status of movies to monitored if no provider is found"
+)
 def re_add(
     ctx: typer.Context,
     providers: List[str] = typer.Option(
@@ -166,7 +183,11 @@ def re_add(
         help="Override the configured streaming providers.",
     ),
     locale: Optional[str] = typer.Option(
-        None, "-l", "--locale", metavar="LOCALE", help="Your locale e.g: en_US."
+        None,
+        "-l",
+        "--locale",
+        metavar="LOCALE",
+        help="Your locale e.g: en_US.",
     ),
     yes: bool = typer.Option(
         False, "-y", "--yes", help="Auto accept the confirmation notice."
@@ -177,7 +198,9 @@ def re_add(
 ):
     # Debug logging
     logger.debug("Got re-add as subcommand")
-    logger.debug(f"Got CLI values for -p, --provider option: {', '.join(providers)}")
+    logger.debug(
+        f"Got CLI values for -p, --provider option: {', '.join(providers)}"
+    )
     logger.debug(f"Got CLI values for -l, --locale option: {locale}")
     logger.debug(f"Got CLI values for -y, --yes option: {yes}")
     logger.debug(f"Got CLI values for --progress option: {progress}")
@@ -227,7 +250,7 @@ def re_add(
             confirmation = output.ask_confirmation("re-add", "movies")
             if not confirmation:
                 logger.warning(
-                    "Aborting Excludarr because user did not confirm the question"
+                    "Aborting Excludarr because user did not confirm the question"  # noqa: E501
                 )
                 raise typer.Abort()
         else:
@@ -241,7 +264,7 @@ def re_add(
             radarr.enable_monitored(movie_info)
 
             rich.print(
-                "Succesfully changed the status of the movies listed in Radarr to monitored!"
+                "Succesfully changed the status of the movies listed in Radarr to monitored!"  # noqa: E501
             )
 
     else:

@@ -14,7 +14,11 @@ app = typer.Typer()
 def list(
     ctx: typer.Context,
     locale: Optional[str] = typer.Option(
-        None, "-l", "--locale", metavar="LOCALE", help="Your locale e.g: en_US."
+        None,
+        "-l",
+        "--locale",
+        metavar="LOCALE",
+        help="Your locale e.g: en_US.",
     ),
 ):
     config: Config = ctx.obj.config

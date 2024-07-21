@@ -13,7 +13,7 @@ from excludarr import __version__
 
 def sonarr_disabled_callback():
     typer.echo(
-        "sonarr command is currently disabled. See https://github.com/excludarr/excludarr/issues/2 for more information.",
+        "sonarr command is currently disabled. See https://github.com/excludarr/excludarr/issues/2 for more information.",  # noqa: E501
         file=sys.stderr,
     )
     raise typer.Exit(1)
@@ -22,7 +22,9 @@ def sonarr_disabled_callback():
 app = typer.Typer()
 app.add_typer(radarr.app, name="radarr", help="Manages movies in Radarr.")
 app.add_typer(
-    sonarr.app, name="sonarr", help="Manages TV shows, seasons and episodes in Sonarr."
+    sonarr.app,
+    name="sonarr",
+    help="Manages TV shows, seasons and episodes in Sonarr.",
 )
 app.add_typer(
     providers.app,
@@ -63,12 +65,13 @@ def main(
     ),
 ):
     """
-    Excludarr is a CLI that interacts with Radarr and Sonarr instances. It completely
-    manages you library in Sonarr and Radarr to only consist out of movies and series that
-    are not present on any of the configured streaming providers. Excludarr can also
-    re monitor movies and series if it is not available anymore on any of the configured
-    streaming providers. You can also configure to delete the already downloaded files of
-    the excluded entry to keep your storage happy!
+    Excludarr is a CLI that interacts with Radarr and Sonarr instances. It
+    completely manages you library in Sonarr and Radarr to only consist out of
+    movies and series that are not present on any of the configured streaming
+    providers. Excludarr can also re monitor movies and series if it is not
+    available anymore on any of the configured streaming providers. You can
+    also configure to delete the already downloaded files of the excluded entry
+    to keep your storage happy!
     """
 
     # Setup the logger
