@@ -1,7 +1,9 @@
+from typing import Collection, Dict, List
 from loguru import logger
 from rich.progress import Progress
 from pyarr import SonarrAPI
 
+from excludarr.core.utils.filter_entries import filter_entries
 import excludarr.modules.pytmdb as pytmdb
 import excludarr.utils.filters as filters
 
@@ -36,6 +38,8 @@ class SonarrActions:
                 jw_id = entry.id
                 jw_imdb_ids = entry.imdbId
 
+                logger.debug(f"{title} - {jw_id} - {jw_imdb_ids}")
+
                 # Break if the TMBD_ID in the query of JustWatch matches the
                 # one in Sonarr
                 if jw_imdb_ids is not None and imdb_id in jw_imdb_ids:
@@ -48,7 +52,12 @@ class SonarrActions:
         return None
 
     def _find_using_tvdb_id(
-        self, title, sonarr_id, tvdb_id, fast, jw_query_payload={}
+        self,
+        title,
+        sonarr_id,
+        tvdb_id,
+        fast,
+        jw_query_payload={},
     ):
 
         # Log the title and Sonarr ID
@@ -163,13 +172,32 @@ class SonarrActions:
         return show, offers
 
     def get_series_to_exclude(
-        self, providers, fast=True, disable_progress=False, tmdb_api_key=None
+        self,
+        bl_series: List,
+        bl_tags: List,
+        providers,
+        fast=True,
+        disable_progress=False,
+        tmdb_api_key=None,
     ):
-        exclude_series = {}
+        exclude_series: Dict = {}
 
         # Get all series listed in Sonarr
         logger.debug("Getting all the series from Sonarr")
-        sonarr_series = self.sonarr_client.get_series()
+        sonarr_series: Collection = self.sonarr_client.get_series()
+
+        series_cnt = len(sonarr_series)
+
+        logger.debug(
+            "Filtering the movies from Radarr with the provided blacklists"
+        )
+        sonarr_series = filter_entries(
+            self.sonarr_client, sonarr_series, bl_series, bl_tags
+        )
+
+        logger.debug(
+            f"Done filtering movies, before: {series_cnt}, after: {len(sonarr_series)}"  # noqa: E501
+        )
 
         # Get the providers listed for the configured locale from JustWatch
         # and filter it with the given providers. This will ensure only the
@@ -201,7 +229,7 @@ class SonarrActions:
                 )
 
                 # Continue if the proper JustWatch ID is found
-                if show is None or offers is None:
+                if show is None or offers is None or len(offers) == 0:
                     continue
                 logger.debug(f"Look up season data for {title}")
 
@@ -351,12 +379,20 @@ class SonarrActions:
                 )
             )
 
+        logger.debug("Done searching series to exclude.")
+
         return exclude_series
 
     def get_series_to_re_add(
-        self, providers, fast=True, disable_progress=False, tmdb_api_key=None
+        self,
+        bl_series: List,
+        bl_tags: List,
+        providers,
+        fast=True,
+        disable_progress=False,
+        tmdb_api_key=None,
     ):
-        re_add_series = {}
+        re_add_series: Dict = {}
 
         # Setup TMDB if there is an API key provided
         if tmdb_api_key:
@@ -364,7 +400,20 @@ class SonarrActions:
 
         # Get all series listed in Sonarr
         logger.debug("Getting all the series from Sonarr")
-        sonarr_series = self.sonarr_client.get_series()
+        sonarr_series: Collection = self.sonarr_client.get_series()
+
+        series_cnt = len(sonarr_series)
+
+        logger.debug(
+            "Filtering the movies from Radarr with the provided blacklists"
+        )
+        sonarr_series = filter_entries(
+            self.sonarr_client, sonarr_series, bl_series, bl_tags
+        )
+
+        logger.debug(
+            f"Done filtering movies, before: {series_cnt}, after: {len(sonarr_series)}"  # noqa: E501
+        )
 
         # Get the providers listed for the configured locale from JustWatch
         # and filter it with the given providers. This will ensure only the
@@ -393,7 +442,7 @@ class SonarrActions:
                 )
 
                 # Continue if the proper JustWatch ID is found
-                if show is None or offers is None:
+                if show is None or offers is None or len(offers) == 0:
                     continue
 
                 logger.debug(f"Look up season data for {title}")

@@ -251,6 +251,12 @@ class JustWatch(object):
 
         # MONETIZATION_TYPES = ["FLATRATE", "RENT", "BUY", "ADS", "FREE"]
         # PRESENTATION_TYPES = ["SD", "HD", "_4K"]
+
+        # TODO: check if there is a way to bypass language checks because atm
+        #       ie. you set "en_IT" you will only find movies that are
+        #       distributed in italy in english.
+        #       if we find a way to bypass this we could apply some kind of
+        #       multi language filter based on the config
         filter: Dict[str, Any] = {}
 
         filter["bestOnly"] = True
