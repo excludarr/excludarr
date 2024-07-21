@@ -10,15 +10,6 @@ import excludarr.commands.providers as providers
 
 from excludarr import __version__
 
-
-def sonarr_disabled_callback():
-    typer.echo(
-        "sonarr command is currently disabled. See https://github.com/excludarr/excludarr/issues/2 for more information.",  # noqa: E501
-        file=sys.stderr,
-    )
-    raise typer.Exit(1)
-
-
 app = typer.Typer()
 app.add_typer(radarr.app, name="radarr", help="Manages movies in Radarr.")
 app.add_typer(
