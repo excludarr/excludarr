@@ -81,7 +81,6 @@ def main(
     logger.debug(f"Starting Excludarr v{__version__}")
 
 
-
 def cli():
     app(prog_name="excludarr")
 

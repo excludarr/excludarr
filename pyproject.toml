@@ -2,22 +2,18 @@
 name = "excludarr"
 version = "1.0.8"
 description = "Excludarr excludes streaming services from Radarr and Sonarr"
-authors = ["Haije Ploeg <ploeg.haije@gmail.com>"]
-license = "GPL-3.0-only"
+authors = ["Haije Ploeg <ploeg.haije@gmail.com>", "barsa2000 <>"]
+license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/ecludarr/excludarr"
-repository = "https://github.com/ecludarr/excludarr"
+homepage = "https://github.com/barsa2000/excludarr"
+repository = "https://github.com/barsa2000/excludarr"
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Build Tools",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.6",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3 :: Only",
 ]
 keywords = [
@@ -42,7 +38,7 @@ include = [
 ]
 
 [tool.poetry.urls]
-"Bug Reports" = "https://github.com/haijeploeg/excludarr/issues"
+"Bug Reports" = "https://github.com/barsa2000/excludarr/issues"
 
 
 [tool.poetry.scripts]
@@ -71,6 +67,12 @@ typer = "^0.12.3"
 mypy = "^1.11.0"
 flake8 = "^7.1.0"
 types-pyyaml = "^6.0.12.20240311"
+poetry-types = "^0.5.1"
+
+[tool.poetry.group.types.dependencies]
+types-flake8 = "^7.1.0.20240711"
+types-requests = "^2.32.0.20240712"
+types-pyyaml = "^6.0.12.20240311"
 
 [build-system]
 requires = ["poetry-core"]
@@ -86,3 +88,6 @@ build_command = "pip install poetry && poetry build"
 [tool.coverage.run]
 branch = true
 source = ["excludarr"]
+
+[tool.black]
+line-length = 79

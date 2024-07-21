@@ -16,12 +16,21 @@ repos:
         name: Python Black
         args: ["--line-length", "79"]
 
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: 'v1.11.0'
-    hooks:
-    - id: mypy
-
   - repo: https://github.com/pycqa/flake8
     rev: '7.1.0'
     hooks:
     - id: flake8
+
+  - repo: https://github.com/jvllmr/poetry-types
+    rev: v0.5.1
+    hooks:
+      - id: poetry-types
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v1.11.0'
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          - "types-flake8"
+          - "types-requests"
+          - "types-pyyaml"
