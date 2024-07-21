@@ -8,10 +8,12 @@ radarr_url="${RADARR_URL:-http://localhost:7878}"
 radarr_api_key="${RADARR_API_KEY:-secret}"
 radarr_verify_ssl="${RADARR_VERIFY_SSL:-false}"
 radarr_exclude="[${RADARR_EXCLUDE:-''}]"
+radarr_exclude_tags="[${RADARR_EXCLUDE_TAGS:-''}]"
 sonarr_url="${SONARR_URL:-http://localhost:8989}"
 sonarr_api_key="${SONARR_API_KEY:-secret}"
 sonarr_verify_ssl="${SONARR_VERIFY_SSL:-false}"
 sonarr_exclude="[${SONARR_EXCLUDE:-''}]"
+sonarr_exclude_tags="[${SONARR_EXCLUDE_TAGS:-''}]"
 cron_mode="${CRON_MODE:-false}"
 
 
@@ -26,12 +28,14 @@ radarr:
   api_key: '$radarr_api_key'
   verify_ssl: $radarr_verify_ssl
   exclude: $radarr_exclude
+  tags_to_exclude: $radarr_exclude_tags
 
 sonarr:
   url: '$sonarr_url'
   api_key: '$sonarr_api_key'
   verify_ssl: $sonarr_verify_ssl
   exclude: $sonarr_exclude
+  tags_to_exclude: $sonarr_exclude_tags
 
 EOF
 

@@ -1,9 +1,9 @@
 ![License](https://img.shields.io/github/license/haijeploeg/excludarr)
-[![release](https://github.com/haijeploeg/excludarr/actions/workflows/release.yml/badge.svg)](https://github.com/haijeploeg/excludarr/actions/workflows/release.yml)
+<!-- [![release](https://github.com/haijeploeg/excludarr/actions/workflows/release.yml/badge.svg)](https://github.com/haijeploeg/excludarr/actions/workflows/release.yml)
 [![Docker](https://github.com/haijeploeg/excludarr/actions/workflows/docker.yml/badge.svg)](https://github.com/haijeploeg/excludarr/actions/workflows/docker.yml)
 [![PyPI version](https://badge.fury.io/py/excludarr.svg)](https://badge.fury.io/py/excludarr)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/excludarr)
-![Docker Pulls](https://img.shields.io/docker/pulls/haijeploeg/excludarr)
+![Docker Pulls](https://img.shields.io/docker/pulls/haijeploeg/excludarr) -->
 
 # Excludarr
 
@@ -13,7 +13,7 @@ Excludarr is a CLI that interacts with Radarr and Sonarr instances. It completel
 
 ## Prerequisites
 
-- Python 3.6 or Docker
+- Python 3.11 or Docker
 - If you have Sonarr: Sonarr V3 (version 2 is not working!)
 - If you have Radarr: Radarr V3
 
@@ -228,10 +228,12 @@ RADARR_URL | http://localhost:7878 | The Radarr URL.
 RADARR_API_KEY | secret | Your Radarr API Key.
 RADARR_VERIFY_SSL | false | To enable SSL verify, can be `true` or `false`.
 RADARR_EXCLUDE | - | Comma seperated list of movies to exclude in the process of Excludarr, e.g. `RADARR_EXCLUDE=The Matrix, F9`.
+RADARR_EXCLUDE_TAGS | - | Comma seperated list of tags to exclude in the process of Excludarr, e.g. `RADARR_EXCLUDE_TAGS=movies,fast-and-furious`.
 SONARR_URL | http://localhost:8989 | The Sonarr URL.
 SONARR_API_KEY | secret | Your Sonarr API Key.
 SONARR_VERIFY_SSL | false | To enable SSL verify, can be `true` or `false`.
 SONARR_EXCLUDE | - | Comma seperated list of series to exclude in Excludarr, e.g. `SONARR_EXCLUDE=Breaking Bad, Game of Thrones`.
+SONARR_EXCLUDE_TAGS | - | Comma seperated list of tags to exclude in Excludarr, e.g. `SONARR_EXCLUDE_TAGS=anime,tv-shows`.
 CRON_MODE | false | Wether to run the docker container using cron. This is useful for docker-compose.
 
 You can put those variables in a env file (e.g. `excludarr.env`) and use it in a command (recommended way). Look the [docker_example.env](.examples/docker_example.env) for an example. If you have set your variables properly, you can execute excludarr in docker by just adding the command and paramaters at the end of the docker command. Example:
