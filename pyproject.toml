@@ -52,7 +52,6 @@ rich = "^13.7.1"
 requests = "^2.32.3"
 pyyaml = "^6.0.1"
 pyarr = "^5.2.0"
-simple-justwatch-python-api = "^0.14"
 httpx = {extras = ["http2"], version = "^0.27.0"}
 
 
@@ -68,6 +67,7 @@ mypy = "^1.11.0"
 flake8 = "^7.1.0"
 types-pyyaml = "^6.0.12.20240311"
 poetry-types = "^0.5.1"
+licensecheck = "^2024.2"
 
 [tool.poetry.group.types.dependencies]
 types-flake8 = "^7.1.0.20240711"

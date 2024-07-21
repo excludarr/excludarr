@@ -14,6 +14,8 @@ class NoConfigException(Exception):
 
 
 class Config:
+    # TODO: better deserialize `Config`, this feels kinda sketchy
+
     _config: Dict
 
     def __init__(self):
@@ -114,6 +116,10 @@ class Config:
         return self.radarr_section.get("exclude", [])
 
     @property
+    def radarr_tags_to_exclude(self):
+        return self.radarr_section.get("tags_to_exclude", [])
+
+    @property
     def sonarr_url(self):
         return self.sonarr_section.get("url", None)
 
@@ -128,3 +134,7 @@ class Config:
     @property
     def sonarr_excludes(self):
         return self.sonarr_section.get("exclude", [])
+
+    @property
+    def sonarr_tags_to_exclude(self):
+        return self.sonarr_section.get("tags_to_exclude", [])

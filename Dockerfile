@@ -24,11 +24,11 @@ WORKDIR /app
 # first setup the dependencies to not invalidate docker cache and speedup builds
 COPY pyproject.toml poetry.lock ./
 RUN touch README.md
-RUN poetry install --without dev --no-root && rm -rf $POETRY_CACHE_DIR
+RUN poetry install --without dev,types --no-root && rm -rf $POETRY_CACHE_DIR
 
 # install excludarr
 COPY excludarr ./excludarr
-RUN poetry install --without dev
+RUN poetry install --without dev,types
 
 WORKDIR /
 

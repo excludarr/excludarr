@@ -107,7 +107,11 @@ def exclude(
     # Get the movies to exclude and exclude the movies that are in the exclude
     # list
     movies_to_exclude = radarr.get_movies_to_exclude(
-        providers, config.fast_search, disable_progress
+        config.radarr_excludes,
+        config.radarr_tags_to_exclude,
+        providers,
+        config.fast_search,
+        disable_progress,
     )
 
     # Only take monitored movies when the action is not-monitored
@@ -115,14 +119,11 @@ def exclude(
         movies_to_exclude = {
             id: values
             for id, values in movies_to_exclude.items()
-            if values["title"] not in config.radarr_excludes
-            and values["radarr_object"]["monitored"]
+            if values["radarr_object"]["monitored"]
         }
     else:
         movies_to_exclude = {
-            id: values
-            for id, values in movies_to_exclude.items()
-            if values["title"] not in config.radarr_excludes
+            id: values for id, values in movies_to_exclude.items()
         }
 
     # Create a list of the Radarr IDs
@@ -229,8 +230,13 @@ def re_add(
 
     # Get the movies that should be re monitored
     movies_to_re_add = radarr.get_movies_to_re_add(
-        providers, config.fast_search, disable_progress
+        config.radarr_excludes,
+        config.radarr_tags_to_exclude,
+        providers,
+        config.fast_search,
+        disable_progress,
     )
+
     movies_to_re_add = {
         id: values
         for id, values in movies_to_re_add.items()

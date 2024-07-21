@@ -1,6 +1,9 @@
+from typing import Collection, List
 from loguru import logger
 from rich.progress import Progress
 from pyarr import RadarrAPI
+
+from .utils.filter_entries import filter_entries
 
 import excludarr.utils.filters as filters
 
@@ -75,13 +78,32 @@ class RadarrActions:
         return None
 
     def get_movies_to_exclude(
-        self, providers, fast=True, disable_progress=False
+        self,
+        bl_movies: List,
+        bl_tags: List,
+        providers,
+        fast=True,
+        disable_progress=False,
     ):
         exclude_movies = {}
 
         # Get all movies listed in Radarr
         logger.debug("Getting all the movies from Radarr")
-        radarr_movies = self.radarr_client.get_movie()
+        radarr_movies: Collection = self.radarr_client.get_movie()
+
+        movies_cnt = len(radarr_movies)
+
+        logger.debug(
+            "Filtering the movies from Radarr with the provided blacklists"
+        )
+        radarr_movies = filter_entries(
+            self.radarr_client, radarr_movies, bl_movies, bl_tags
+        )
+
+        logger.debug(
+            f"Done filtering movies, before: {movies_cnt}, after: {len(radarr_movies)}"  # noqa: E501
+        )
+        # exit()
 
         # Get the providers listed for the configured locale from JustWatch
         # and filter it with the given providers. This will ensure only the
@@ -119,10 +141,9 @@ class RadarrActions:
 
                 (found_movie, offers) = find_res
 
-                logger.debug(f"{found_movie=}")
-
-                if found_movie is None or offers is None:
+                if found_movie is None or offers is None or len(offers) == 0:
                     continue
+
                 # Get all the providers the movie is streaming on
                 movie_providers = filters.get_jw_providers(offers)
 
@@ -161,20 +182,41 @@ class RadarrActions:
                     f"{title} is streaming on {', '.join(clear_names)}"
                 )
 
+        logger.debug("Done searching movies to exclude.")
+
         return exclude_movies
 
     def get_movies_to_re_add(
-        self, providers, fast=True, disable_progress=False
+        self,
+        bl_movies: List,
+        bl_tags: List,
+        providers,
+        fast=True,
+        disable_progress=False,
     ):
         re_add_movies = {}
 
         # Get all movies listed in Radarr and filter it to only include not
         # monitored movies
         logger.debug("Getting all the movies from Radarr")
-        radarr_movies = self.radarr_client.get_movie()
-        radarr_not_monitored_movies = [
-            movie for movie in radarr_movies if not movie["monitored"]
-        ]
+        radarr_movies: Collection = self.radarr_client.get_movie()
+
+        movies_cnt = len(radarr_movies)
+
+        logger.debug(
+            "Filtering the movies from Radarr with the provided blacklists"
+        )
+        radarr_movies = filter_entries(
+            self.radarr_client,
+            radarr_movies,
+            bl_movies,
+            bl_tags,
+            monitored=False,
+        )
+
+        logger.debug(
+            f"Done filtering movies, before: {movies_cnt}, after: {len(radarr_movies)}"  # noqa: E501
+        )
 
         # Get the providers listed for the configured locale from JustWatch
         # and filter it with the given providers. This will ensure only the
@@ -187,7 +229,7 @@ class RadarrActions:
 
         progress = Progress(disable=disable_progress)
         with progress:
-            for movie in progress.track(radarr_not_monitored_movies):
+            for movie in progress.track(radarr_movies):
                 # Set the minimal base variables
                 radarr_id = movie["id"]
                 title = movie["title"]
@@ -210,8 +252,9 @@ class RadarrActions:
                 (found_movie, offers) = find_res
 
                 logger.debug(f"{found_movie=}")
+                logger.debug(f"{offers=}")
 
-                if found_movie is None or offers is None:
+                if found_movie is None or offers is None or len(offers) != 0:
                     continue
 
                 # Get all the providers the movie is streaming on
