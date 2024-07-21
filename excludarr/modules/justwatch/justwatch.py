@@ -1,8 +1,7 @@
-from typing import Any, Dict, List, TypeAlias, Union
+from typing import Any, Dict, List, TypeAlias
 import httpx
 
 from json import JSONDecodeError
-from loguru import logger
 
 # from simplejustwatchapi.justwatch import search
 
@@ -148,7 +147,7 @@ class JustWatch(object):
 
         try:
             result_json = self._get_providers(jwid, providers, forceFlatrate)
-        except:
+        except Exception:
             return None
 
         result: MovieOffers = []
@@ -164,7 +163,7 @@ class JustWatch(object):
 
         try:
             result_json = self._get_providers(jwid, providers, forceFlatrate)
-        except:
+        except Exception:
             return None
 
         result: ShowOffers = {}
@@ -187,7 +186,7 @@ class JustWatch(object):
     ) -> list[SearchResult] | None:
         try:
             return self._search(title, "MOVIE", results, year)
-        except:
+        except Exception:
             return None
 
     def search_show(
@@ -196,7 +195,7 @@ class JustWatch(object):
 
         try:
             return self._search(title, "SHOW", results, year)
-        except:
+        except Exception:
             return None
 
     def _search(
@@ -209,7 +208,7 @@ class JustWatch(object):
 
         filter["searchQuery"] = title
         filter["objectTypes"] = [objectType]
-        if year != None:
+        if year is not None:
             filter["releaseYear"] = {
                 "min": year,
                 "max": year,

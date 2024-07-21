@@ -19,7 +19,7 @@ class SearchResult:
         self.year = node["content"]["originalReleaseYear"]
         self.imdbId = node["content"]["externalIds"]["imdbId"]
         tmdbId = node["content"]["externalIds"]["tmdbId"]
-        self.tmdbId = int(tmdbId) if tmdbId != None else None
+        self.tmdbId = int(tmdbId) if tmdbId is not None else None
 
 
 class Offer:

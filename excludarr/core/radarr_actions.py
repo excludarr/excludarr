@@ -5,15 +5,11 @@ from pyarr import RadarrAPI
 import excludarr.utils.filters as filters
 
 from excludarr.modules.justwatch import JustWatch
-from excludarr.modules.justwatch.exceptions import (
-    JustWatchNotFound,
-    JustWatchTooManyRequests,
-)
 
 
 class RadarrActions:
     def __init__(self, url, api_key, locale):
-        logger.debug(f"Initializing PyRadarr")
+        logger.debug("Initializing PyRadarr")
         self.radarr_client = RadarrAPI(url, api_key)
 
         logger.debug(f"Initializing JustWatch API with locale: {locale}")
@@ -55,8 +51,8 @@ class RadarrActions:
                 jw_tmdb_id = entry.tmdbId
 
                 # TODO: maybe also check year
-                if (imdb_id != None and imdb_id == jw_imdb_id) or (
-                    tmdb_id != None and tmdb_id == jw_tmdb_id
+                if (imdb_id is not None and imdb_id == jw_imdb_id) or (
+                    tmdb_id is not None and tmdb_id == jw_tmdb_id
                 ):
                     logger.debug(
                         f"Found JustWatch IMDB ID: {jw_imdb_id} for {title} with Radarr IMDB ID: {imdb_id}"
@@ -109,7 +105,7 @@ class RadarrActions:
 
                 # Find the movie
                 find_res = self._find_movie(movie, jw_providers, fast, exclude=True)
-                if find_res == None:
+                if find_res is None:
                     continue
 
                 (found_movie, offers) = find_res
@@ -191,7 +187,7 @@ class RadarrActions:
 
                 # Find the movie
                 find_res = self._find_movie(movie, jw_providers, fast, exclude=True)
-                if find_res == None:
+                if find_res is None:
                     continue
 
                 (found_movie, offers) = find_res
@@ -256,7 +252,7 @@ class RadarrActions:
             except Exception as e:
                 logger.error(e)
                 logger.error(
-                    f"Something went wrong with deleting the movies from Radarr, check the configuration or try --debug for more information"
+                    "Something went wrong with deleting the movies from Radarr, check the configuration or try --debug for more information"
                 )
 
     def disable_monitored(self, movies):

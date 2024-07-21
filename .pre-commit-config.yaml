@@ -14,4 +14,3 @@ repos:
     hooks:
       - id: black
         name: Python Black
-        args: ["--line-length", "100"]

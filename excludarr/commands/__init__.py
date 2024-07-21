@@ -1,4 +1,3 @@
-import typer
 from excludarr.utils.config import Config
 
 
