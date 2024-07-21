@@ -8,7 +8,7 @@ from excludarr.commands import MyContext
 import excludarr.utils.output as output
 
 from excludarr.core.radarr_actions import RadarrActions
-from excludarr.utils.config import Config
+from excludarr.utils.config import Config, NoConfigException
 from excludarr.utils.enums import Action
 
 app = typer.Typer()
@@ -282,7 +282,13 @@ def init(ctx: typer.Context):
     loglevel = logger._core.min_level  # type: ignore
 
     logger.debug("Reading configuration file")
-    config = Config()
+
+    try:
+        config = Config()
+        logger.debug("Config read succesfully")
+    except NoConfigException:
+        logger.debug("Config couldn't be loaded")
+        raise typer.Exit()
 
     context: MyContext = MyContext()
 

@@ -20,13 +20,15 @@ def get_tmdb_ids(external_ids):
         tmdb_ids = [
             int(x["external_id"])
             for x in external_ids
-            if (x["provider"] == "tmdb_latest" or x["provider"] == "tmdb") and x["external_id"].isnumeric()
+            if (x["provider"] == "tmdb_latest" or x["provider"] == "tmdb")
+            and x["external_id"].isnumeric()
         ]
         tmdb_ids = list(set(tmdb_ids))
     except (KeyError, IndexError):
         tmdb_ids = []
 
     return tmdb_ids
+
 
 def get_imdb_ids(external_ids):
     try:
@@ -60,15 +62,15 @@ def get_providers(raw_providers, providers):
     return jw_providers
 
 
-def get_jw_providers(raw_data):
+def get_jw_providers(offers: list[Offer]):
     providers = {}
 
     try:
-        for entry in raw_data["offers"]:
+        for entry in offers:
             providers.update(
                 {
-                    entry["provider_id"]: {
-                        "shortname": entry["package_short_name"],
+                    entry.id: {
+                        "shortname": entry.providerShortName,
                     }
                 }
             )
@@ -86,17 +88,17 @@ def get_release_date(raw_movie_data, format="%Y-%m-%d"):
     release_physical = raw_movie_data.get("physicalRelease")
 
     if release_cinema:
-        release_date = datetime.datetime.strptime(release_cinema, "%Y-%m-%dT%H:%M:%SZ").strftime(
-            format
-        )
+        release_date = datetime.datetime.strptime(
+            release_cinema, "%Y-%m-%dT%H:%M:%SZ"
+        ).strftime(format)
     elif release_digital:
-        release_date = datetime.datetime.strptime(release_digital, "%Y-%m-%dT%H:%M:%SZ").strftime(
-            format
-        )
+        release_date = datetime.datetime.strptime(
+            release_digital, "%Y-%m-%dT%H:%M:%SZ"
+        ).strftime(format)
     elif release_physical:
-        release_date = datetime.datetime.strptime(release_physical, "%Y-%m-%dT%H:%M:%SZ").strftime(
-            format
-        )
+        release_date = datetime.datetime.strptime(
+            release_physical, "%Y-%m-%dT%H:%M:%SZ"
+        ).strftime(format)
     else:
         release_date = None
 
@@ -104,7 +106,7 @@ def get_release_date(raw_movie_data, format="%Y-%m-%d"):
 
 
 def get_filesize_gb(filesize):
-    filesize_gb = filesize / 1024.0 ** 3
+    filesize_gb = filesize / 1024.0**3
     return "%.2f" % filesize_gb + "GB"
 
 
@@ -112,7 +114,10 @@ def get_episode_data(episodes, season_number, episode_number):
     episode_data = {}
 
     for episode in episodes:
-        if season_number == episode["seasonNumber"] and episode_number == episode["episodeNumber"]:
+        if (
+            season_number == episode["seasonNumber"]
+            and episode_number == episode["episodeNumber"]
+        ):
             episode_data = {
                 "episode_id": episode["id"],
                 "monitored": episode["monitored"],

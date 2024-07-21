@@ -55,6 +55,8 @@ class JustWatch(object):
 
         if data.status_code == 400:
             raise JustWatchBadRequest(data.text)
+        if data.status_code == 403:
+            raise JustWatchForbidden()
         elif data.status_code == 404:
             raise JustWatchNotFound()
         elif data.status_code == 429:
