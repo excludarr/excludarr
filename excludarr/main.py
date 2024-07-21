@@ -40,6 +40,20 @@ def _setup_logging(debug):
         log_level = "DEBUG"
 
     logger.remove()
+
+    # create a debug file if we are in debug mode
+    # this file will be cleared every time the program runs,
+    # if you need it, save it before it's gone :)
+    if debug:
+        logger.add(
+            "file.log",
+            level=log_level,
+            colorize=False,
+            backtrace=True,
+            diagnose=True,
+            mode="w"
+        )
+
     logger.add(
         sys.stdout,
         colorize=True,
