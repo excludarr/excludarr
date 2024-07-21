@@ -18,15 +18,21 @@ def print_movies_to_exclude(movies, total_filesize):
 
     # Setup table
     table = Table(
-        show_footer=True, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False
+        show_footer=True,
+        row_styles=["none", "dim"],
+        box=box.MINIMAL,
+        pad_edge=False,
     )
     with Live(table, console=console, screen=False):
         # Setup table columns and totals
         table.add_column("Release Date") or "Unknown"
         table.add_column(
-            "Title", Text.from_markup("[b][i]Total Used Diskspace", justify="right")
+            "Title",
+            Text.from_markup("[b][i]Total Used Diskspace", justify="right"),
         )
-        table.add_column("Used Diskspace", filters.get_filesize_gb(total_filesize))
+        table.add_column(
+            "Used Diskspace", filters.get_filesize_gb(total_filesize)
+        )
         table.add_column("Streaming Providers")
 
         for _, movie in movies.items():
@@ -45,7 +51,10 @@ def print_movies_to_re_add(movies):
 
     # Setup table
     table = Table(
-        show_footer=False, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False
+        show_footer=False,
+        row_styles=["none", "dim"],
+        box=box.MINIMAL,
+        pad_edge=False,
     )
     with Live(table, console=console, screen=False):
         # Setup table columns
@@ -66,15 +75,21 @@ def print_series_to_exclude(series, total_filesize):
 
     # Setup table
     table = Table(
-        show_footer=True, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False
+        show_footer=True,
+        row_styles=["none", "dim"],
+        box=box.MINIMAL,
+        pad_edge=False,
     )
     with Live(table, console=console, screen=False):
         # Setup table columns and totals
         table.add_column("Release Year")
         table.add_column(
-            "Title", Text.from_markup("[b][i]Total Used Diskspace", justify="right")
+            "Title",
+            Text.from_markup("[b][i]Total Used Diskspace", justify="right"),
         )
-        table.add_column("Used Diskspace", filters.get_filesize_gb(total_filesize))
+        table.add_column(
+            "Used Diskspace", filters.get_filesize_gb(total_filesize)
+        )
         table.add_column("Seasons")
         table.add_column("Episodes")
         table.add_column("Providers")
@@ -110,7 +125,10 @@ def print_series_to_re_add(series):
 
     # Setup table
     table = Table(
-        show_footer=False, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False
+        show_footer=False,
+        row_styles=["none", "dim"],
+        box=box.MINIMAL,
+        pad_edge=False,
     )
     with Live(table, console=console, screen=False):
         # Setup table columns
@@ -137,7 +155,10 @@ def print_providers(providers):
 
     # Setup table
     table = Table(
-        show_footer=False, row_styles=["none", "dim"], box=box.MINIMAL, pad_edge=False
+        show_footer=False,
+        row_styles=["none", "dim"],
+        box=box.MINIMAL,
+        pad_edge=False,
     )
     with Live(table, console=console, screen=False):
         # Setup table columns
@@ -155,16 +176,18 @@ def print_providers(providers):
 def ask_confirmation(action, kind):
     if action == Action.delete:
         confirmation = Confirm.ask(
-            f"Are you sure you want to delete the listed {kind}?", default=False
+            f"Are you sure you want to delete the listed {kind}?",
+            default=False,
         )
     elif action == Action.not_monitored:
         confirmation = Confirm.ask(
-            f"Are you sure you want to change the listed {kind} to not-monitored?",
+            f"Are you sure you want to change the listed {kind} to not-monitored?",  # noqa: E501
             default=False,
         )
     elif action == "re-add":
         confirmation = Confirm.ask(
-            f"Are you sure you want to re monitor the listed {kind}?", default=False
+            f"Are you sure you want to re monitor the listed {kind}?",
+            default=False,
         )
 
     return confirmation
@@ -173,15 +196,15 @@ def ask_confirmation(action, kind):
 def print_success_exclude(action, kind):
     if action == Action.delete and kind == "series":
         rich.print(
-            "Succesfully deleted the series and/or changed the status of serveral seasons and episodes listed in Sonarr to not monitored!"
+            "Succesfully deleted the series and/or changed the status of serveral seasons and episodes listed in Sonarr to not monitored!"  # noqa: E501
         )
     elif action == Action.delete and kind == "movies":
         rich.print("Succesfully deleted the movies from Radarr!")
     elif action == Action.not_monitored and kind == "series":
         rich.print(
-            "Succesfully changed the status of the series and/or several seasons and episodes listed in Sonarr to not monitored!"
+            "Succesfully changed the status of the series and/or several seasons and episodes listed in Sonarr to not monitored!"  # noqa: E501
         )
     elif action == Action.not_monitored and kind == "movies":
         rich.print(
-            "Succesfully changed the status of the movies listed in Radarr to not monitored!"
+            "Succesfully changed the status of the movies listed in Radarr to not monitored!"  # noqa: E501
         )

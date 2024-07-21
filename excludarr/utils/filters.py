@@ -75,7 +75,7 @@ def get_jw_providers(offers: list[Offer]):
                 }
             )
     except KeyError:
-        # This means that there are no providers found in the configured locale.
+        # This means that there are no providers found in the configured locale
         # Ignore this exception and return an empty dict.
         pass
 
@@ -168,7 +168,11 @@ def get_providers_from_seasons_episodes(seasons, episodes):
         [season["providers"] for season in seasons if season.get("providers")]
     )
     episode_providers = flatten(
-        [episode["providers"] for episode in episodes if episode.get("providers")]
+        [
+            episode["providers"]
+            for episode in episodes
+            if episode.get("providers")
+        ]
     )
 
     providers = list(set(season_providers + episode_providers))

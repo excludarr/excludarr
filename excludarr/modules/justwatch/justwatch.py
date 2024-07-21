@@ -15,7 +15,9 @@ from .exceptions import (
 )
 from .models import MovieOffers, SearchResult, Offer, ShowOffers
 
-JSON: TypeAlias = dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
+JSON: TypeAlias = (
+    dict[str, "JSON"] | list["JSON"] | str | int | float | bool | None
+)
 
 
 class JustWatch(object):
@@ -82,7 +84,7 @@ class JustWatch(object):
     ):
         # JustWatch returns a 403 without a reasonable User-Agent
         headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"  # noqa: E501
         }
         url = self._build_url(path)
 
@@ -122,12 +124,18 @@ class JustWatch(object):
 
         jw_locales = self._http_get(path)
 
-        valid_locale = any([True for i in jw_locales if i["full_locale"] == locale])
+        valid_locale = any(
+            [True for i in jw_locales if i["full_locale"] == locale]
+        )
 
         # Check if the locale is a iso_3166_2 Country Code
         if not valid_locale:
             locale = "".join(
-                [i["full_locale"] for i in jw_locales if i["iso_3166_2"] == locale]
+                [
+                    i["full_locale"]
+                    for i in jw_locales
+                    if i["iso_3166_2"] == locale
+                ]
             )
 
         # If the locale is empty return the default locale

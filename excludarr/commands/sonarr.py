@@ -14,7 +14,9 @@ from excludarr.utils.enums import Action
 app = typer.Typer()
 
 
-@app.command(help="Exclude TV shows in Sonarr by deleting or not monitoring them")
+@app.command(
+    help="Exclude TV shows in Sonarr by deleting or not monitoring them"
+)
 def exclude(
     ctx: typer.Context,
     providers: List[str] = typer.Option(
@@ -25,7 +27,11 @@ def exclude(
         help="Override the configured streaming providers.",
     ),
     locale: Optional[str] = typer.Option(
-        None, "-l", "--locale", metavar="LOCALE", help="Your locale e.g: en_US."
+        None,
+        "-l",
+        "--locale",
+        metavar="LOCALE",
+        help="Your locale e.g: en_US.",
     ),
     action: Action = typer.Option(
         ..., "-a", "--action", help="Change the status in Radarr."
@@ -34,7 +40,10 @@ def exclude(
         False, "-d", "--delete-files", help="Delete already downloaded files."
     ),
     exclusion: bool = typer.Option(
-        False, "-e", "--exclusion", help="Add an exclusion to prevent auto importing."
+        False,
+        "-e",
+        "--exclusion",
+        help="Add an exclusion to prevent auto importing.",
     ),
     yes: bool = typer.Option(
         False, "-y", "--yes", help="Auto accept the confirmation notice."
@@ -45,7 +54,9 @@ def exclude(
 ):
     # Debug logging
     logger.debug("Got exclude as subcommand")
-    logger.debug(f"Got CLI values for -p, --provider option: {', '.join(providers)}")
+    logger.debug(
+        f"Got CLI values for -p, --provider option: {', '.join(providers)}"
+    )
     logger.debug(f"Got CLI values for -l, --locale option: {locale}")
     logger.debug(f"Got CLI values for -a, --action option: {action}")
     logger.debug(f"Got CLI values for -d, --delete option: {delete_files}")
@@ -88,12 +99,14 @@ def exclude(
             values["episodes"] = [
                 episode
                 for episode in values["episodes"]
-                if episode.get("monitored", False) or episode.get("has_file", False)
+                if episode.get("monitored", False)
+                or episode.get("has_file", False)
             ]
             values["seasons"] = [
                 season
                 for season in values["seasons"]
-                if season.get("monitored", False) or season.get("has_file", False)
+                if season.get("monitored", False)
+                or season.get("has_file", False)
             ]
         else:
             values["episodes"] = [
@@ -102,7 +115,9 @@ def exclude(
                 if episode.get("monitored", False)
             ]
             values["seasons"] = [
-                season for season in values["seasons"] if season.get("monitored", False)
+                season
+                for season in values["seasons"]
+                if season.get("monitored", False)
             ]
 
         # Determine if serie should be deleted fully
@@ -158,7 +173,7 @@ def exclude(
             confirmation = output.ask_confirmation(action, "series")
             if not confirmation:
                 logger.warning(
-                    "Aborting Excludarr because user did not confirm the question"
+                    "Aborting Excludarr because user did not confirm the question"  # noqa: E501
                 )
                 raise typer.Abort()
         else:
@@ -167,7 +182,9 @@ def exclude(
         if confirmation:
             for sonarr_id, data in series_to_exclude.items():
                 sonarr_object = data["sonarr_object"]
-                sonarr_total_seasons = sonarr_object["statistics"]["seasonCount"]
+                sonarr_total_seasons = sonarr_object["statistics"][
+                    "seasonCount"
+                ]
                 sonarr_full_delete = data["full_delete"]
                 seasons = [season["season"] for season in data["seasons"]]
                 episodes = data["episodes"]
@@ -178,13 +195,16 @@ def exclude(
                 ]
                 episode_files = data["sonarr_file_ids"]
 
-                # Check if total seasons match with the amount of seasons to exclude and delete or
-                # change the status to not monitored for the whole serie
+                # Check if total seasons match with the amount of seasons to
+                # exclude and delete or change the status to not monitored for
+                # the whole serie
                 if sonarr_full_delete:
                     if action == Action.delete:
                         sonarr.delete_serie(sonarr_id, delete_files, exclusion)
                     elif action == Action.not_monitored:
-                        sonarr.disable_monitored_serie(sonarr_id, sonarr_object)
+                        sonarr.disable_monitored_serie(
+                            sonarr_id, sonarr_object
+                        )
                         sonarr.disable_monitored_seasons(
                             sonarr_id,
                             sonarr_object,
@@ -193,7 +213,9 @@ def exclude(
 
                         # Delete the episode files if delete flag is set
                         if delete_files and episode_files:
-                            sonarr.delete_episode_files(sonarr_id, episode_files)
+                            sonarr.delete_episode_files(
+                                sonarr_id, episode_files
+                            )
                 else:
                     # Set the seasons and episodes to not-monitored
                     if seasons:
@@ -201,7 +223,9 @@ def exclude(
                             sonarr_id, sonarr_object, seasons
                         )
                     if episodes:
-                        sonarr.disable_monitored_episodes(sonarr_id, episode_ids)
+                        sonarr.disable_monitored_episodes(
+                            sonarr_id, episode_ids
+                        )
 
                     # Delete the episode files if delete flag is set
                     if delete_files and episode_files:
@@ -210,11 +234,13 @@ def exclude(
             output.print_success_exclude(action, "series")
     else:
         rich.print(
-            "There are no more series also available on the configured streaming providers!"
+            "There are no more series also available on the configured streaming providers!"  # noqa: E501
         )
 
 
-@app.command(help="Change status of series to monitored if no provider is found")
+@app.command(
+    help="Change status of series to monitored if no provider is found"
+)
 def re_add(
     ctx: typer.Context,
     providers: List[str] = typer.Option(
@@ -225,7 +251,11 @@ def re_add(
         help="Override the configured streaming providers.",
     ),
     locale: Optional[str] = typer.Option(
-        None, "-l", "--locale", metavar="LOCALE", help="Your locale e.g: en_US."
+        None,
+        "-l",
+        "--locale",
+        metavar="LOCALE",
+        help="Your locale e.g: en_US.",
     ),
     yes: bool = typer.Option(
         False, "-y", "--yes", help="Auto accept the confirmation notice."
@@ -236,7 +266,9 @@ def re_add(
 ):
     # Debug logging
     logger.debug("Got exclude as subcommand")
-    logger.debug(f"Got CLI values for -p, --provider option: {', '.join(providers)}")
+    logger.debug(
+        f"Got CLI values for -p, --provider option: {', '.join(providers)}"
+    )
     logger.debug(f"Got CLI values for -l, --locale option: {locale}")
     logger.debug(f"Got CLI values for -y, --yes option: {yes}")
     logger.debug(f"Got CLI values for --progress option: {progress}")
@@ -278,7 +310,9 @@ def re_add(
             if not episode.get("monitored", True)
         ]
         values["seasons"] = [
-            season for season in values["seasons"] if not season.get("monitored", True)
+            season
+            for season in values["seasons"]
+            if not season.get("monitored", True)
         ]
 
     series_to_re_add = {
@@ -305,7 +339,7 @@ def re_add(
             confirmation = output.ask_confirmation("re-add", "series")
             if not confirmation:
                 logger.warning(
-                    "Aborting Excludarr because user did not confirm the question"
+                    "Aborting Excludarr because user did not confirm the question"  # noqa: E501
                 )
                 raise typer.Abort()
         else:
@@ -314,7 +348,9 @@ def re_add(
         if confirmation:
             for sonarr_id, data in series_to_re_add.items():
                 sonarr_object = data["sonarr_object"]
-                sonarr_total_seasons = sonarr_object["statistics"]["seasonCount"]
+                sonarr_total_seasons = sonarr_object["statistics"][
+                    "seasonCount"
+                ]
                 sonarr_total_not_monitored_seasons = len(
                     [
                         season
@@ -332,17 +368,22 @@ def re_add(
                 ]
                 all_episode_ids = data["all_episode_ids"]
 
-                # Check if total seasons match with the amount of seasons to re-add and
-                # change the status to monitored for the whole serie, seasons and episodes
+                # Check if total seasons match with the amount of seasons to
+                # re-add and change the status to monitored for the whole
+                # serie, seasons and episodes
                 if (
                     sonarr_total_not_monitored_seasons == total_seasons
                     and sonarr_total_not_monitored_seasons != 0
                 ):
                     sonarr.enable_monitored_serie(sonarr_id, sonarr_object)
                     sonarr.enable_monitored_seasons(
-                        sonarr_id, sonarr_object, list(range(sonarr_total_seasons + 1))
+                        sonarr_id,
+                        sonarr_object,
+                        list(range(sonarr_total_seasons + 1)),
                     )
-                    sonarr.enable_monitored_episodes(sonarr_id, all_episode_ids)
+                    sonarr.enable_monitored_episodes(
+                        sonarr_id, all_episode_ids
+                    )
 
                 else:
                     # Enable monitoring on the serie object it self
@@ -353,10 +394,12 @@ def re_add(
                             sonarr_id, sonarr_object, seasons
                         )
                     if episodes:
-                        sonarr.enable_monitored_episodes(sonarr_id, episode_ids)
+                        sonarr.enable_monitored_episodes(
+                            sonarr_id, episode_ids
+                        )
 
             rich.print(
-                "Succesfully changed the status of the series listed in Sonarr to monitored!"
+                "Succesfully changed the status of the series listed in Sonarr to monitored!"  # noqa: E501
             )
     else:
         rich.print("There are no more series to re-add!")

@@ -50,7 +50,7 @@ class Config:
                 self.config = safe_load(_file)
 
         logger.debug(
-            f"Read the following configuration: {redact_config_dict(copy.deepcopy(self.config))}"
+            f"Read the following configuration: {redact_config_dict(copy.deepcopy(self.config))}"  # noqa: E501
         )
 
     def dump(self):

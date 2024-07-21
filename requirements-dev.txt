@@ -8,3 +8,5 @@ setuptools>=59.7.0
 wheel>=0.37.0
 pre-commit>=2.16.0
 black>=24.4.0
+types-PyYAML>=6.0.1
+types-requests>=2.32.0
