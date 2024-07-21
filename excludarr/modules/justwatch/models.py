@@ -19,14 +19,8 @@ class SearchResult:
         self.year = node["content"]["originalReleaseYear"]
         self.imdbId = node["content"]["externalIds"]["imdbId"]
         tmdbId = node["content"]["externalIds"]["tmdbId"]
-        self.tmdbId = int(tmdbId) if tmdbId != None else None
+        self.tmdbId = int(tmdbId) if tmdbId is not None else None
 
-
-# flat offers list
-type MovieOffers = List[Offer]
-
-# season -> episode -> offers list
-type ShowOffers = Dict[int, Dict[int, List[Offer]]]
 
 class Offer:
     id: str
@@ -53,3 +47,10 @@ class Offer:
         self.providerClearName = node["package"]["clearName"]
         self.providertechnicalName = node["package"]["technicalName"]
         self.providerShortName = node["package"]["shortName"]
+
+
+# flat offers list
+MovieOffers = List[Offer]
+
+# season -> episode -> offers list
+ShowOffers = Dict[int, Dict[int, List[Offer]]]
