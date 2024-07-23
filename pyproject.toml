@@ -68,6 +68,7 @@ flake8 = "^7.1.0"
 types-pyyaml = "^6.0.12.20240311"
 poetry-types = "^0.5.1"
 licensecheck = "^2024.2"
+arr_setup = {path = "./arr-setup", develop = true}
 
 [tool.poetry.group.types.dependencies]
 types-flake8 = "^7.1.0.20240711"

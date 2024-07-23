@@ -14,7 +14,6 @@ class NoConfigException(Exception):
 
 
 class Config:
-    # TODO: better deserialize `Config`, this feels kinda sketchy
 
     _config: Dict
 
