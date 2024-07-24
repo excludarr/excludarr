@@ -1,3 +1,4 @@
+from pathlib import Path
 from pyarr import RadarrAPI, SonarrAPI
 from pyarr.base import BaseArrAPI
 from pyarr.exceptions import PyarrBadRequest
@@ -309,16 +310,24 @@ def add_series(config: Config, ignore_unknown_tags: bool = True):
 
 
 @app.command()
-def setup():
+def setup(
+    config_path: Path = typer.Option(
+        "./config.yml",
+        "-c",
+        "--config",
+        metavar="CONFIG",
+        help='The location of your config file e.g: "./config.yml"',
+        exists=True,
+        dir_okay=False
+    ),
+):
     """
     Initializes the command. Reads the configuration.
     """
-    logger.info("Got update as subcommand")
+    logger.info("Got setup as subcommand")
 
     logger.info("Reading configuration file")
-
-    # TODO: take config path as parameter to override the default ones
-    config = Config()
+    config = Config(config_path)
 
     add_movies(config)
     add_series(config)
@@ -336,23 +345,8 @@ def _setup_logging(info):
     """
 
     log_level = "INFO"
-    if info:
-        log_level = "info"
 
     logger.remove()
-
-    # create a info file if we are in info mode
-    # this file will be cleared every time the program runs,
-    # if you need it, save it before it's gone :)
-    if info:
-        logger.add(
-            "file.log",
-            level=log_level,
-            colorize=False,
-            backtrace=True,
-            diagnose=True,
-            mode="w",
-        )
 
     logger.add(
         sys.stdout,

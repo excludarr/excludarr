@@ -41,7 +41,7 @@ class Config:
             config_path = Path("./config.yml")
 
         if not config_path.exists() or not config_path.is_file():
-            raise NoConfigException("no config")
+            raise NoConfigException("no valid config file was provided")
 
         self.load(config_path)
 
@@ -54,7 +54,7 @@ class Config:
             with open(config_path, "r") as _file:
                 self._config = safe_load(_file)
 
-        logger.debug(
+        logger.info(
             f"Read the following configuration: {redact_config_dict(copy.deepcopy(self._config))}"  # noqa: E501
         )
 
