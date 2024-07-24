@@ -16,6 +16,7 @@ pyyaml = "^6.0.1"
 typer = "^0.12.3"
 loguru = "^0.7.2"
 rich = "^13.7.1"
+tenacity = "^8.5.0"
 
 [tool.poetry.scripts]
 arr_setup = "arr_setup.main:cli"

@@ -1,59 +1,49 @@
 from typing import Optional
 from pyarr import RadarrAPI, SonarrAPI
-from pyarr.types import JsonObject
+from pyarr.types import JsonObject, JsonArray
 
 
-def __add_series(
-    self,
-    series: JsonObject,
-    quality_profile_id: int,
-    language_profile_id: int,
-    root_dir: str,
-    season_folder: bool = True,
-    monitored: bool = True,
-    ignore_episodes_with_files: bool = False,
-    ignore_episodes_without_files: bool = False,
-    search_for_missing_episodes: bool = False,
-    tags: list[int] = [],
+# GET /episode
+def __sonarr_get_episode(
+    self, id_: int, series: bool = False, season: int | None = None
 ) -> JsonObject:
-    """Adds a new series to your collection
-
-    Note:
-        if you do not add the required params, then the series wont function. some of these without the others can
-        indeed make a "series". But it wont function properly in nzbdrone.
+    """Get episodes by ID or series
 
     Args:
-        series (JsonObject): A series object from `lookup()`
-        quality_profile_id (int): Database id for quality profile
-        language_profile_id (int): Database id for language profile
-        root_dir (str): Root folder location, full path will be created from this
-        season_folder (bool, optional): Create a folder for each season. Defaults to True.
-        monitored (bool, optional): Monitor this series. Defaults to True.
-        ignore_episodes_with_files (bool, optional): Ignore any episodes with existing files. Defaults to False.
-        ignore_episodes_without_files (bool, optional): Ignore any episodes without existing files. Defaults to False.
-        search_for_missing_episodes (bool, optional): Search for missing episodes to download. Defaults to False.
+        id_ (int): ID for Episode or Series.
+        series (bool, optional): Set to true if the ID is for a Series. Defaults to false.
 
     Returns:
-        JsonObject: Dictionary of added record
+        JsonArray: List of dictionaries with items
     """
-    if not monitored and series.get("seasons"):
-        for season in series["seasons"]:
-            season["monitored"] = False
+    params = {"seriesId": id_}
+    if season is not None:
+        params["seasonNumber"] = season
 
-    series["rootFolderPath"] = root_dir
-    series["qualityProfileId"] = quality_profile_id
-    series["languageProfileId"] = language_profile_id
-    series["seasonFolder"] = season_folder
-    series["monitored"] = monitored
-    series["addOptions"] = {
-        "ignoreEpisodesWithFiles": ignore_episodes_with_files,
-        "ignoreEpisodesWithoutFiles": ignore_episodes_without_files,
-        "searchForMissingEpisodes": search_for_missing_episodes,
-    }
-    series["tags"] = tags
+    return self._get(
+        f"episode{'' if series else f'/{id_}'}",
+        self.ver_uri,
+        params=params if series else None,
+    )
 
-    return self._post("series", self.ver_uri, data=series)
+# PUT /season/monitor
+def __sonarr_upd_season_monitor(
+    self, season_ids: list[int], monitored: bool = True
+) -> JsonArray:
+    """Update episode monitored status
 
+    Args:
+        episode_ids (list[int]): All episode IDs to be updated
+        monitored (bool, optional): True or False. Defaults to True.
+
+    Returns:
+        JsonArray: list of dictionaries containing updated records
+    """
+    return self._put(
+        "season/monitor",
+        self.ver_uri,
+        data={"seasonIds": season_ids, "monitored": monitored},
+    )
 
 def __upd_movie(
     self,
@@ -83,7 +73,8 @@ def __upd_movie(
 def patch():
     # for some reason `add_series` does not accept `tags` when adding a serie
     # even if the API supports it
-    setattr(SonarrAPI, "add_series", __add_series)
+    setattr(SonarrAPI, "get_episode", __sonarr_get_episode)
+    setattr(SonarrAPI, "upd_season_monitor", __sonarr_upd_season_monitor)
 
     # there was a random print inside this function, now there is not :)
     setattr(RadarrAPI, "upd_movie", __upd_movie)
