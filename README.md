@@ -1,9 +1,8 @@
-![License](https://img.shields.io/github/license/barsa2000/excludarr)
+![License](https://img.shields.io/github/license/barsa2000/excludarr) [![Docker](https://github.com/barsa2000/excludarr/actions/workflows/docker.yml/badge.svg)](https://github.com/barsa2000/excludarr/actions/workflows/docker.yml) ![Docker Pulls](https://img.shields.io/docker/pulls/barsa/excludarr)
 <!-- [![release](https://github.com/haijeploeg/excludarr/actions/workflows/release.yml/badge.svg)](https://github.com/haijeploeg/excludarr/actions/workflows/release.yml) -->
-[![Docker](https://github.com/barsa2000/excludarr/actions/workflows/docker.yml/badge.svg)](https://github.com/barsa2000/excludarr/actions/workflows/docker.yml)
 <!-- [![PyPI version](https://badge.fury.io/py/excludarr.svg)](https://badge.fury.io/py/excludarr) -->
 <!-- ![PyPI - Downloads](https://img.shields.io/pypi/dm/excludarr) -->
-![Docker Pulls](https://img.shields.io/docker/pulls/barsa/excludarr)
+
 
 # Excludarr
 
