@@ -1,5 +1,4 @@
 ---
-
 name: Docker
 
 on:
@@ -11,7 +10,6 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-
       - name: Prepare tags
         id: prep
         run: |
@@ -44,5 +42,5 @@ jobs:
           push: true
           tags: ${{ steps.prep.outputs.tags }}
           platforms: |-
-              linux/amd64
-              linux/arm64
+            linux/amd64
+            linux/arm64
