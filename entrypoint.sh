@@ -16,8 +16,7 @@ sonarr_exclude="[${SONARR_EXCLUDE:-''}]"
 sonarr_exclude_tags="[${SONARR_EXCLUDE_TAGS:-''}]"
 cron_mode="${CRON_MODE:-false}"
 
-
-cat << EOF > /etc/excludarr/excludarr.yml
+cat <<EOF >/etc/excludarr/excludarr.yml
 general:
   fast_search: $general_fast_search
   locale: $general_locale
@@ -40,27 +39,27 @@ sonarr:
 EOF
 
 if [[ ! -z $TMDB_API_KEY ]]; then
-    cat << EOF >> /etc/excludarr/excludarr.yml
+  cat <<EOF >>/etc/excludarr/excludarr.yml
 tmdb:
   api_key: '$tmdb_api_key'
 EOF
 fi
 
-cat << EOF > /bin/excludarr
+cat <<EOF >/bin/excludarr
 #!/bin/bash
-poetry run -C /app excludarr
+poetry run -C /app excludarr \$@
 EOF
 
 chmod +x /bin/excludarr
 
 if [ "$cron_mode" = true ]; then
-    if test -f "/etc/excludarr/crontab"; then
-        cp /etc/excludarr/crontab /var/spool/cron/crontabs/root
-        crond -l 8 -f
-    else
-        echo "No crontab file mounted! Please mount a valid crontab file at /etc/excludarr/crontab before running in cron mode!"
-        exit 1
-    fi
+  if test -f "/etc/excludarr/crontab"; then
+    cp /etc/excludarr/crontab /var/spool/cron/crontabs/root
+    crond -l 8 -f
+  else
+    echo "No crontab file mounted! Please mount a valid crontab file at /etc/excludarr/crontab before running in cron mode!"
+    exit 1
+  fi
 else
-    excludarr $@
+  excludarr $@
 fi

@@ -46,6 +46,8 @@ services:
 
   config_arr_setup:
     build: ./config_arr_setup
+    profiles:
+      - setup
     volumes:
       - radarr_config:/radarr_config
       - sonarr_config:/sonarr_config
@@ -66,6 +68,8 @@ services:
 
   arr_setup:
     build: ./arr-setup
+    profiles:
+      - setup
     volumes:
       - arr_setup_config:/config
     links:

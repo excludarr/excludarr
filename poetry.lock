@@ -32,27 +32,6 @@ files = [
 ]
 
 [[package]]
-name = "arr-setup"
-version = "0.1.0"
-description = ""
-optional = false
-python-versions = "^3.11"
-files = []
-develop = true
-
-[package.dependencies]
-loguru = "^0.7.2"
-pyarr = "^5.2.0"
-pyyaml = "^6.0.1"
-rich = "^13.7.1"
-tenacity = "^8.5.0"
-typer = "^0.12.3"
-
-[package.source]
-type = "directory"
-url = "arr-setup"
-
-[[package]]
 name = "attrs"
 version = "23.2.0"
 description = "Classes Without Boilerplate"
@@ -1838,21 +1817,6 @@ files = [
 ]
 
 [[package]]
-name = "tenacity"
-version = "8.5.0"
-description = "Retry code until it succeeds"
-optional = false
-python-versions = ">=3.8"
-files = [
-    {file = "tenacity-8.5.0-py3-none-any.whl", hash = "sha256:b594c2a5945830c267ce6b79a166228323ed52718f30302c1359836112346687"},
-    {file = "tenacity-8.5.0.tar.gz", hash = "sha256:8bc6c0c8a09b31e6cad13c47afbed1a567518250a9a171418582ed8d9c20ca78"},
-]
-
-[package.extras]
-doc = ["reno", "sphinx"]
-test = ["pytest", "tornado (>=4.5)", "typeguard"]
-
-[[package]]
 name = "tomli"
 version = "2.0.1"
 description = "A lil' TOML parser"
@@ -2141,4 +2105,4 @@ test = ["big-O", "importlib-resources", "jaraco.functools", "jaraco.itertools", 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<4.0"
-content-hash = "0838d1bc2e181975059451e90e72d1eb4580f0dc147c2870cf13ce8cf6adac4c"
+content-hash = "0fdaf3cf4a7a1d0d340dce44ccb006b5baab7ca42ecca4318e262c823b318cae"
