@@ -11,7 +11,7 @@ FROM python:3.11-alpine
 
 ENV PS1="\[\e[0;33m\]|> excludarr <| \[\e[1;35m\]\W\[\e[0m\] \[\e[0m\]# "
 
-RUN apk add --no-cache bash
+RUN apk add --no-cache bash gcc libc-dev libffi-dev
 RUN pip install --no-cache-dir poetry==1.8.3
 
 ENV POETRY_NO_INTERACTION=1 \
