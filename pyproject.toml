@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "excludarr"
-version = "1.0.8"
+version = "1.1.0"
 description = "Excludarr excludes streaming services from Radarr and Sonarr"
 authors = ["Haije Ploeg <ploeg.haije@gmail.com>", "barsa2000 <>"]
 license = "MIT"

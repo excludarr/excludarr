@@ -15,9 +15,9 @@ jobs:
       - name: Prepare tags
         id: prep
         run: |
-          REPO="haijeploeg/excludarr"
+          REPO="barsa2000/excludarr"
           RELEASE_TAG="${GITHUB_REF#refs/*/}"
-          TAGS="haijeploeg/excludarr:${GITHUB_REF#refs/*/},haijeploeg/excludarr:latest"
+          TAGS="barsa/excludarr:${GITHUB_REF#refs/*/},barsa/excludarr:latest"
           echo ::set-output name=release_tag::${RELEASE_TAG}
           echo ::set-output name=tags::${TAGS}
           echo ::set-output name=repo::${REPO}
