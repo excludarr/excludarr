@@ -1,13 +1,12 @@
-![License](https://img.shields.io/github/license/excludarr/excludarr)
+![License](https://img.shields.io/github/license/barsa2000/excludarr) [![Docker](https://github.com/barsa2000/excludarr/actions/workflows/docker.yml/badge.svg)](https://github.com/barsa2000/excludarr/actions/workflows/docker.yml) ![Docker Pulls](https://img.shields.io/docker/pulls/barsa/excludarr)
+<!-- [![release](https://github.com/haijeploeg/excludarr/actions/workflows/release.yml/badge.svg)](https://github.com/haijeploeg/excludarr/actions/workflows/release.yml) -->
+<!-- [![PyPI version](https://badge.fury.io/py/excludarr.svg)](https://badge.fury.io/py/excludarr) -->
+<!-- ![PyPI - Downloads](https://img.shields.io/pypi/dm/excludarr) -->
+
 
 # Excludarr
 
-<blockquote>
-❗ This project is a continuation of <a href=https://github.com/haijeploeg/excludarr>haijeploeg/excludarr</a> which became unmaintained and stopped working around October, 2023 due to <a href="https://github.com/haijeploeg/excludarr/issues/92">this issue</a>, which this project has corrected.  However, due to changes in the JustWatch API, the <mark style="background-color: #dddddd">&nbsp;sonarr&nbsp;</mark> command is disabled, until new API calls can be implemented in a subsequent update.  
-
-
-</blockquote>
-<br/>
+> NOTE: This project is a continuation of [haijeploeg/excludarr](https://github.com/haijeploeg/excludarr) which became unmaintained and stopped working due to a change in the JustWatch API. The whole JustWatch library was rewrote to use the new GraphQL endpoint and is now fixed.
 
 Excludarr is a CLI that interacts with Radarr and Sonarr instances. It completely manages you library in Sonarr and Radarr to only consist out of movies and series that are not present on any of the configured streaming providers. Excludarr can also re monitor movies and series if it is not available anymore on any of the configured streaming providers. You can also configure to delete the already downloaded files of the excluded entry to keep your storage happy! 🎉
 
@@ -15,16 +14,16 @@ Excludarr is a CLI that interacts with Radarr and Sonarr instances. It completel
 
 ## Prerequisites
 
-- Python 3.6 or Docker
+- Python 3.11 or Docker
 - If you have Sonarr: Sonarr V3 (version 2 is not working!)
 - If you have Radarr: Radarr V3
 
 ## Installation
 
-Installation of excludarr can be done using pip.
+Installation of excludarr can be done using poetry.
 
 ```bash
-pip install excludarr
+poetry install excludarr
 ```
 
 ## Configuration
@@ -81,6 +80,7 @@ Succesfully deleted the movies from Radarr!
 ```
 
 > NOTE: If you want to exclude any of the movies listed in the table, just copy the title and paste it in your configuration file under `radarr -> excludes`.
+> NOTE: If you want to exclude movies with a specific tag on Radarr, just add the tag label to `radarr -> tags_to_exclude`.
 
 ### Re-add
 
@@ -114,6 +114,7 @@ Succesfully changed the status of the movies listed in Radarr to monitored!
 ```
 
 > NOTE: If you want to exclude any of the movies listed in the table, just copy the title and paste it in your configuration file under `radarr -> excludes`.
+> NOTE: If you want to exclude movies with a specific tag on Radarr, just add the tag label to `radarr -> tags_to_exclude`.
 
 ## Sonarr
 
@@ -175,6 +176,7 @@ Succesfully deleted the series and/or changed the status of serveral seasons and
 ```
 
 > NOTE: If you want to exclude any of the series listed in the table, just copy the title and paste it in your configuration file under `sonarr -> excludes`.
+> NOTE: If you want to exclude movies with a specific tag on Sonarr, just add the tag label to `sonarr -> tags_to_exclude`.
 
 ### Re-add
 
@@ -215,10 +217,11 @@ Succesfully changed the status of the series listed in Sonarr to monitored!
 ```
 
 > NOTE: If you want to exclude any of the series listed in the table, just copy the title and paste it in your configuration file under `sonarr -> excludes`.
+> NOTE: If you want to exclude movies with a specific tag on Sonarr, just add the tag label to `sonarr -> tags_to_exclude`.
 
 ## Docker
 
-To use this setup using Docker, you can use the `haijeploeg/excludarr` container. You can use the following environment variables:
+To use this setup using Docker, you can use the `barsa/excludarr` container. You can use the following environment variables:
 
 | Variable | Default | Description |
 | --- | --- | --- |
@@ -230,17 +233,19 @@ To use this setup using Docker, you can use the `haijeploeg/excludarr` container
 | RADARR_API_KEY | secret | Your Radarr API Key. |
 | RADARR_VERIFY_SSL | false | To enable SSL verify, can be `true` or `false`. |
 | RADARR_EXCLUDE | - | Comma seperated list of movies to exclude in the process of Excludarr, e.g. `RADARR_EXCLUDE=The Matrix, F9`. |
+| RADARR_EXCLUDE_TAGS | - | Comma seperated list of tags to exclude in the process of Excludarr, e.g. `RADARR_EXCLUDE_TAGS=movies,fast-and-furious`.
 | SONARR_URL | http://localhost:8989 | The Sonarr URL. |
 | SONARR_API_KEY | secret | Your Sonarr API Key. |
 | SONARR_VERIFY_SSL | false | To enable SSL verify, can be `true` or `false`. |
 | SONARR_EXCLUDE | - | Comma seperated list of series to exclude in Excludarr, e.g. `SONARR_EXCLUDE=Breaking Bad, Game of Thrones`. |
+| SONARR_EXCLUDE_TAGS | - | Comma seperated list of tags to exclude in Excludarr, e.g. `SONARR_EXCLUDE_TAGS=anime,tv-shows`.
 | CRON_MODE | false | Wether to run the docker container using cron. This is useful for docker-compose. |
 
 You can put those variables in a env file (e.g. `excludarr.env`) and use it in a command (recommended way). Look the [docker_example.env](.examples/docker_example.env) for an example. If you have set your variables properly, you can execute excludarr in docker by just adding the command and paramaters at the end of the docker command. Example:
 
 ```bash
-docker run -it --rm --env-file excludarr.env haijeploeg/excludarr:latest radarr exclude -a delete -d -e --progress
-docker run -it --rm --env-file excludarr.env haijeploeg/excludarr:latest sonarr exclude -a not-monitored
+docker run -it --rm --env-file excludarr.env barsa/excludarr:latest radarr exclude -a delete -d -e --progress
+docker run -it --rm --env-file excludarr.env barsa/excludarr:latest sonarr exclude -a not-monitored
 ```
 
 ### Docker compose
@@ -263,7 +268,7 @@ $ cat docker-compose.yml
 version: "3"
 services:
   excludarr:
-    image: haijeploeg/excludarr
+    image: barsa/excludarr
     container_name: excludarr
     environment:
       - GENERAL_FAST_SEARCH=true
@@ -272,10 +277,12 @@ services:
       - RADARR_URL=http://radarr.example.com:7878
       - RADARR_API_KEY=secret
       - RADARR_VERIFY_SSL=false
+      - RADARR_EXCLUDE_TAGS=[excludes]
       - SONARR_URL=http://sonarr.example.com:8989
       - SONARR_API_KEY=secret
       - SONARR_VERIFY_SSL=false
       - SONARR_EXCLUDE="Queen of the South, Breaking Bad"
+      - SONARR_EXCLUDE_TAGS=[excludes]
       - CRON_MODE=true
     volumes:
       - ./crontab:/etc/excludarr/crontab
@@ -326,6 +333,8 @@ Below are some frequently asked questions. Please look if your question is liste
 
 ## License
 
-The project is [licensed](LICENSE) under [GNU General Public License v3](https://www.gnu.org/licenses/gpl-3.0.html) or later.
+The project is [licensed](LICENSE) under [MIT](LICENSE) or later.
 
-This project is a fork of this [original project](https://github.com/haijeploeg/excludarr), where you can find its [original MIT license](https://github.com/haijeploeg/excludarr/blob/main/LICENSE).  A copy of the original license is also included in this repository in [LICENSE.old](LICENSE.old)
+# Developers
+
+Check the [development page](.github/DEVELOPER.md)

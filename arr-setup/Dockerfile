@@ -9,9 +9,9 @@
 
 FROM python:3.11-alpine
 
-ENV PS1="\[\e[0;33m\]|> excludarr <| \[\e[1;35m\]\W\[\e[0m\] \[\e[0m\]# "
+ENV PS1="\[\e[0;33m\]|> arr_setup <| \[\e[1;35m\]\W\[\e[0m\] \[\e[0m\]# "
 
-RUN apk add --no-cache bash gcc libc-dev libffi-dev
+RUN apk add --no-cache bash yq
 RUN pip install --no-cache-dir poetry==1.8.3
 
 ENV POETRY_NO_INTERACTION=1 \
@@ -24,17 +24,17 @@ WORKDIR /app
 # first setup the dependencies to not invalidate docker cache and speedup builds
 COPY pyproject.toml poetry.lock ./
 RUN touch README.md
-RUN poetry install --without dev,types --no-root && rm -rf $POETRY_CACHE_DIR
+RUN poetry install --without dev --no-root && rm -rf $POETRY_CACHE_DIR
 
-# install excludarr
-COPY excludarr ./excludarr
-RUN poetry install --without dev,types
+# install arr_setup
+COPY arr_setup ./arr_setup
+RUN poetry install --without dev
+
+VOLUME config
 
 WORKDIR /
 
-# used to mount the crontab
-RUN mkdir -p /etc/excludarr
+COPY docker_scripts/run_arr_setup.sh /bin/arr_setup
+RUN chmod +x /bin/arr_setup
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-ENTRYPOINT ["/entrypoint.sh"]
+ENTRYPOINT ["/bin/arr_setup"]
