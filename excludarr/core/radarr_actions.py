@@ -7,8 +7,6 @@ from .utils.filter_entries import filter_entries
 
 import excludarr.utils.filters as filters
 
-from simplejustwatchapi.query import MediaEntry
-
 from excludarr.modules.justwatch import JustWatch
 
 
