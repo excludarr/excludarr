@@ -1,4 +1,4 @@
-![License](https://img.shields.io/github/license/excludarr/excludarr) [![Docker](https://github.com/excludarr/excludarr/actions/workflows/docker.yml/badge.svg)](https://github.com/excludarr/excludarr/actions/workflows/docker.yml) ![Docker Pulls](https://img.shields.io/docker/pulls/barsa/excludarr)
+![License](https://img.shields.io/github/license/excludarr/excludarr) [![Docker](https://github.com/excludarr/excludarr/actions/workflows/docker.yml/badge.svg)](https://github.com/excludarr/excludarr/actions/workflows/docker.yml) ![Docker Pulls](https://img.shields.io/docker/pulls/excludarr/excludarr)
 <!-- [![release](https://github.com/haijeploeg/excludarr/actions/workflows/release.yml/badge.svg)](https://github.com/haijeploeg/excludarr/actions/workflows/release.yml) -->
 <!-- [![PyPI version](https://badge.fury.io/py/excludarr.svg)](https://badge.fury.io/py/excludarr) -->
 <!-- ![PyPI - Downloads](https://img.shields.io/pypi/dm/excludarr) -->
@@ -221,7 +221,7 @@ Succesfully changed the status of the series listed in Sonarr to monitored!
 
 ## Docker
 
-To use this setup using Docker, you can use the `barsa/excludarr` container. You can use the following environment variables:
+To use this setup using Docker, you can use the `excludarr/excludarr` container. You can use the following environment variables:
 
 | Variable | Default | Description |
 | --- | --- | --- |
@@ -244,8 +244,8 @@ To use this setup using Docker, you can use the `barsa/excludarr` container. You
 You can put those variables in a env file (e.g. `excludarr.env`) and use it in a command (recommended way). Look the [docker_example.env](.examples/docker_example.env) for an example. If you have set your variables properly, you can execute excludarr in docker by just adding the command and paramaters at the end of the docker command. Example:
 
 ```bash
-docker run -it --rm --env-file excludarr.env barsa/excludarr:latest radarr exclude -a delete -d -e --progress
-docker run -it --rm --env-file excludarr.env barsa/excludarr:latest sonarr exclude -a not-monitored
+docker run -it --rm --env-file excludarr.env excludarr/excludarr:latest radarr exclude -a delete -d -e --progress
+docker run -it --rm --env-file excludarr.env excludarr/excludarr:latest sonarr exclude -a not-monitored
 ```
 
 ### Docker compose
@@ -268,7 +268,7 @@ $ cat docker-compose.yml
 version: "3"
 services:
   excludarr:
-    image: barsa/excludarr
+    image: excludarr/excludarr
     container_name: excludarr
     environment:
       - GENERAL_FAST_SEARCH=true

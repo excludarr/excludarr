@@ -3,7 +3,7 @@
 version: "3"
 services:
   excludarr:
-    image: barsa/excludarr
+    image: excludarr/excludarr
     container_name: excludarr
     environment:
       - GENERAL_FAST_SEARCH=true
