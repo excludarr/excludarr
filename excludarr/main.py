@@ -51,7 +51,7 @@ def _setup_logging(debug):
             colorize=False,
             backtrace=True,
             diagnose=True,
-            mode="w"
+            mode="w",
         )
 
     logger.add(
@@ -84,6 +84,7 @@ def main(
 
     # Logging
     logger.debug(f"Starting Excludarr v{__version__}")
+
 
 def cli():
     app(prog_name="excludarr")

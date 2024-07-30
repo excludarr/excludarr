@@ -1,10 +1,10 @@
 ################################################################################
 ## NOTE
-## 
+##
 ## we could make even smaller docker images by setting up a multi-stage build
-## but atm the image looks small enough to me and I don't feel like it's 
+## but atm the image looks small enough to me and I don't feel like it's
 ## necessary yet :)
-## 
+##
 ################################################################################
 
 FROM python:3.11-alpine

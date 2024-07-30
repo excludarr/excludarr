@@ -15,7 +15,7 @@ def __sonarr_get_episode(
 
     Returns:
         JsonArray: List of dictionaries with items
-    """
+    """  # noqa: E501
     params = {"seriesId": id_}
     if season is not None:
         params["seasonNumber"] = season
@@ -25,6 +25,7 @@ def __sonarr_get_episode(
         self.ver_uri,
         params=params if series else None,
     )
+
 
 # PUT /season/monitor
 def __sonarr_upd_season_monitor(
@@ -45,6 +46,7 @@ def __sonarr_upd_season_monitor(
         data={"seasonIds": season_ids, "monitored": monitored},
     )
 
+
 def __upd_movie(
     self,
     data: JsonObject,
@@ -58,7 +60,7 @@ def __upd_movie(
 
     Returns:
         JsonObject: Dictionary with updated record
-    """
+    """  # noqa: E501
     params = {}
     if move_files is not None:
         params["moveFiles"] = move_files

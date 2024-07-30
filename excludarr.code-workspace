@@ -10,7 +10,7 @@
 			"gitlens.codeLens.symbolScopes": [
 				"!Module"
 			],
-			"editor.rulers": [100]
+			"editor.rulers": [80]
 		}
 	}
 }

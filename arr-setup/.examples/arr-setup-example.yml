@@ -16,7 +16,7 @@ radarr:
 
     - title: "From Beyond"
       monitored: false
-      
+
     - title: "imdb:tt0090163"
 
 sonarr:
@@ -24,7 +24,7 @@ sonarr:
   url: 'http://localhost:8989'
   # The Sonarr api key
   api_key: 123abc123abc123abc123abc123abc12
-  
+
   # series to add (title can be the title or `tvdb:<id>`)
   series:
     # the title of the series to add

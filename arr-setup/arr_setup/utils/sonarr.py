@@ -1,8 +1,5 @@
-from typing import Dict, List
-
 from pyarr import SonarrAPI
-from pyarr.types import JsonObject, JsonArray
-from .config import Config
+from pyarr.types import JsonArray
 from tenacity import retry, wait_fixed, stop_after_attempt, retry_if_result
 
 

@@ -13,7 +13,7 @@ def filter_entries(
 
     logger.debug("Getting tags from Radarr")
 
-    all_tags = arr_client.get_tag()
+    all_tags: List = arr_client.get_tag()  # type: ignore
 
     logger.debug(f"Tags from Radarr:  {all_tags}")
     logger.debug(f"Tags to blacklist: {bl_tags}")

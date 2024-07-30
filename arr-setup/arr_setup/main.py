@@ -195,7 +195,7 @@ def add_series(config: Config, ignore_unknown_tags: bool = True):
     from .utils.sonarr import sonarr_get_episode
 
     logger.info(
-        "Done adding series to sonar, now update all of them for monitoring and tags"
+        "Done adding series to sonar, now update all of them for monitoring and tags"  # noqa: E501
     )
     for serie in config.sonarr_series:
 
@@ -208,7 +208,7 @@ def add_series(config: Config, ignore_unknown_tags: bool = True):
 
         logger.info(f"updating {title} with id: {sonarr_id}")
 
-        serie_to_update: Dict = sonarr_client.get_series(id_=sonarr_id)  # type: ignore
+        serie_to_update: Dict = sonarr_client.get_series(id_=sonarr_id)  # type: ignore   # noqa: E501
 
         # add tags
         tag_ids = get_and_add_tags(sonarr_client, serie.get("tags", []))
@@ -246,7 +246,7 @@ def add_series(config: Config, ignore_unknown_tags: bool = True):
                     raise ValueError
             except ValueError:
                 logger.info(
-                    f"skipping {season_n} for {title}, reason: invalid season value"
+                    f"skipping {season_n} for {title}, reason: invalid season value"  # noqa: E501
                 )
                 continue
 
@@ -301,7 +301,7 @@ def add_series(config: Config, ignore_unknown_tags: bool = True):
             )
 
             logger.info(
-                f"{title} - updated episodes {episodes_to_set_monitored} from season {season}"
+                f"{title} - updated episodes {episodes_to_set_monitored} from season {season}"  # noqa: E501
             )
 
         logger.info(f"updated {title}")
@@ -318,7 +318,7 @@ def setup(
         metavar="CONFIG",
         help='The location of your config file e.g: "./config.yml"',
         exists=True,
-        dir_okay=False
+        dir_okay=False,
     ),
 ):
     """
