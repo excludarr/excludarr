@@ -156,7 +156,6 @@ class SonarrActions:
             show = self._find_using_tvdb_id(
                 title, sonarr_id, tvdb_id, fast, jw_query_payload
             )
-            print("kek")
         else:
             # Skip this serie if no IMDB ID and TVDB ID are found
             logger.debug(
