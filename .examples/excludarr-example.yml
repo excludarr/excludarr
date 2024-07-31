@@ -33,6 +33,13 @@ radarr:
   # This will prevent that excludarr will touch the title in Radarr.
   exclude:
     - 'Dave Chappelle: The Closer'
+  # Optional: exclude different tags. input the name of the tag as shown in Radarr
+  # This will exclude the titles with the specified tags in all actions (exclude and re-add) that excludarr does.
+  # This will prevent that excludarr will touch the titles with the specified tags in Radarr.
+  tags_to_exclude:
+    - movies
+    - other-tag
+
 
 sonarr:
   # The Radarr base url (include http of https)
@@ -46,3 +53,9 @@ sonarr:
   # This will prevent that excludarr will touch the title in Sonarr.
   exclude:
     - Queen of the South
+  # Optional: exclude different tags. input the name of the tag as shown in Sonarr
+  # This will exclude the titles with the specified tags in all actions (exclude and re-add) that excludarr does.
+  # This will prevent that excludarr will touch the titles with the specified tags in Sonarr.
+  tags_to_exclude:
+    - anime
+    - tv-shows

@@ -3,7 +3,7 @@
 version: "3"
 services:
   excludarr:
-    image: haijeploeg/excludarr
+    image: excludarr/excludarr
     container_name: excludarr
     environment:
       - GENERAL_FAST_SEARCH=true
@@ -12,10 +12,12 @@ services:
       - RADARR_URL=http://radarr.example.com:7878
       - RADARR_API_KEY=secret
       - RADARR_VERIFY_SSL=false
+      - RADARR_EXCLUDE_TAGS="anime"
       - SONARR_URL=http://sonarr.example.com:8989
       - SONARR_API_KEY=secret
       - SONARR_VERIFY_SSL=false
       - SONARR_EXCLUDE="Queen of the South, Breaking Bad"
+      - SONARR_EXCLUDE_TAGS="anime, tv-shows"
       - CRON_MODE=true
     volumes:
       - ./crontab:/etc/excludarr/crontab
