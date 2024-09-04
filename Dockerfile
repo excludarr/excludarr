@@ -37,4 +37,4 @@ RUN mkdir -p /etc/excludarr
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-ENTRYPOINT ["bash"]
+ENTRYPOINT ["/entrypoint.sh"]
