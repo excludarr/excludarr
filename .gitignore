@@ -112,3 +112,6 @@ test.py
 
 # local docker volumes
 .docker
+
+providers.json
+.directory
