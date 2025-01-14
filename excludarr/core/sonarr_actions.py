@@ -1,7 +1,7 @@
 from typing import Collection, Dict, List
 from loguru import logger
 from rich.progress import Progress
-from pyarr import SonarrAPI
+from .utils.patch_pyarr import PatchedSonarrAPI as SonarrAPI
 
 from excludarr.core.utils.filter_entries import filter_entries
 import excludarr.modules.pytmdb as pytmdb
@@ -585,7 +585,11 @@ class SonarrActions:
 
         try:
             logger.debug(f"Deleting serie with Sonarr ID: {id}")
-            self.sonarr_client.del_series(id, delete_files=delete_files)
+            self.sonarr_client.del_series(
+                id,
+                delete_files=delete_files,
+                add_exclusion=add_import_exclusion,
+            )
         except Exception as e:
             logger.error(e)
             logger.error(
