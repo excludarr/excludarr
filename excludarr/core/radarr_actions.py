@@ -1,7 +1,7 @@
 from typing import Collection, List
 from loguru import logger
 from rich.progress import Progress
-from pyarr import RadarrAPI
+from .utils.patch_pyarr import PatchedRadarrAPI as RadarrAPI
 
 from .utils.filter_entries import filter_entries
 
